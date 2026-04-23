@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.IntentPay" parent="android:Theme.Material.NoActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.IntentPay.Splash" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background -->
+        <item name="windowSplashScreenBackground">#121212</item>
+        <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an animated drawable -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/intentpay_logo</item>
+        <!-- Set the theme of the Activity that directly follows your splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.IntentPay</item>
+    </style>
+</resources>

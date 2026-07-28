@@ -2,7 +2,6 @@ package com.intentpay.ui.reflection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -15,9 +14,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.intentpay.domain.models.Category
+import com.intentpay.ui.theme.IosBlue
+import com.intentpay.ui.theme.IosRed
+import com.intentpay.ui.theme.SurfaceDarkGray
+import com.intentpay.ui.theme.TextSecondary
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ReflectionScreen(
     viewModel: ReflectionViewModel,
@@ -36,7 +39,7 @@ fun ReflectionScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Black
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -50,9 +53,9 @@ fun ReflectionScreen(
             
             Text(
                 text = "Hold on.",
-                style = MaterialTheme.typography.displayLarge,
+                fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.error,
+                color = IosRed,
                 modifier = Modifier.align(Alignment.Start)
             )
             
@@ -60,40 +63,41 @@ fun ReflectionScreen(
             
             Text(
                 text = "What was this ₹$amount for?",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
                 modifier = Modifier.align(Alignment.Start)
+            )
+            
+            Spacer(modifier = Modifier.height(40.dp))
+            
+            TextField(
+                value = purpose,
+                onValueChange = { purpose = it },
+                placeholder = { Text("Justification (Required)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(10.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = SurfaceDarkGray,
+                    unfocusedContainerColor = SurfaceDarkGray,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    unfocusedPlaceholderColor = TextSecondary
+                )
             )
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            OutlinedTextField(
-                value = purpose,
-                onValueChange = { purpose = it },
-                label = { Text("Justification (Required)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
             Text(
-                text = "Quick Select",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.Start)
+                text = "CATEGORY",
+                fontSize = 13.sp,
+                color = TextSecondary,
+                modifier = Modifier.align(Alignment.Start).padding(bottom = 8.dp)
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -104,14 +108,14 @@ fun ReflectionScreen(
                     Surface(
                         onClick = { selectedCategory = cat },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+                        color = if (isSelected) IosBlue else SurfaceDarkGray,
                     ) {
                         Text(
                             text = cat.displayName,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                         )
                     }
                 }
@@ -123,17 +127,18 @@ fun ReflectionScreen(
             Button(
                 onClick = { viewModel.saveReflection(purpose, selectedCategory) },
                 enabled = purpose.isNotBlank(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = IosBlue,
+                    disabledContainerColor = SurfaceDarkGray
                 )
             ) {
-                Text("Save & Continue", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("Save & Continue", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = if(purpose.isNotBlank()) Color.White else TextSecondary)
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

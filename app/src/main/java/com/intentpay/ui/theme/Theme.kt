@@ -17,21 +17,21 @@ import androidx.core.view.WindowCompat
 
 // Enforcing Dark Mode Palette primarily for aesthetic modern fintech vibe
 private val DarkColorPalette = darkColorScheme(
-    primary = PrimaryIndigo,
-    secondary = SecondaryAccent,
-    tertiary = TertiaryRose,
-    background = BackgroundDeepDark,
-    surface = SurfaceDark,
-    surfaceVariant = SurfaceContainerHigh,
+    primary = IosBlue,
+    secondary = IosGray,
+    tertiary = IosGreen,
+    background = BackgroundBlack,
+    surface = SurfaceDarkGray,
+    surfaceVariant = SurfaceElevated,
     onPrimary = Color.White,
-    onSecondary = BackgroundDeepDark,
+    onSecondary = Color.White,
     onTertiary = Color.White,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
-    onSurfaceVariant = TextVariant,
-    error = TertiaryRose,
-    outline = OutlineVariant,
-    outlineVariant = OutlineVariant
+    onBackground = TextWhite,
+    onSurface = TextWhite,
+    onSurfaceVariant = TextSecondary,
+    error = IosRed,
+    outline = DividerColor,
+    outlineVariant = DividerColor
 )
 
 @Composable

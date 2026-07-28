@@ -6,21 +6,28 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.intentpay.domain.models.Category
+import com.intentpay.ui.theme.IosBlue
+import com.intentpay.ui.theme.SurfaceDarkGray
+import com.intentpay.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ManualPaymentScreen(
     viewModel: ManualPaymentViewModel,
@@ -98,27 +105,30 @@ fun ManualPaymentScreen(
         )
     }
 
-    val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = MaterialTheme.colorScheme.primary,
-        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-        focusedLabelColor = MaterialTheme.colorScheme.primary,
-        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val textFieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = SurfaceDarkGray,
+        unfocusedContainerColor = SurfaceDarkGray,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color.White,
+        focusedLabelColor = IosBlue,
+        unfocusedLabelColor = TextSecondary
     )
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Black,
         topBar = {
             TopAppBar(
-                title = { Text("Manual Payment", fontWeight = FontWeight.Bold) },
+                title = { Text("Manual Payment", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = IosBlue)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = Color.Transparent,
                 )
             )
         }
@@ -127,65 +137,73 @@ fun ManualPaymentScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
             Button(
                 onClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = SurfaceDarkGray)
             ) {
-                Text("Scan QR Code", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                Text("Scan QR Code Instead", color = IosBlue, fontSize = 17.sp)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text("PAYMENT DETAILS", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
 
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Amount (₹)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = textFieldColors
-            )
-            OutlinedTextField(
-                value = merchantName,
-                onValueChange = { merchantName = it },
-                label = { Text("Merchant Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = textFieldColors
-            )
-            OutlinedTextField(
-                value = upiId,
-                onValueChange = { upiId = it },
-                label = { Text("Merchant UPI ID") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = textFieldColors
-            )
-            OutlinedTextField(
-                value = purpose,
-                onValueChange = { purpose = it },
-                label = { Text("Purpose (Mandatory)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = textFieldColors
-            )
+            // iOS Style Grouped List Background
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceDarkGray, RoundedCornerShape(10.dp))
+            ) {
+                TextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount (₹)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = textFieldColors
+                )
+                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
+                
+                TextField(
+                    value = merchantName,
+                    onValueChange = { merchantName = it },
+                    label = { Text("Merchant Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = textFieldColors
+                )
+                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
+                
+                TextField(
+                    value = upiId,
+                    onValueChange = { upiId = it },
+                    label = { Text("Merchant UPI ID") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = textFieldColors
+                )
+                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
+                
+                TextField(
+                    value = purpose,
+                    onValueChange = { purpose = it },
+                    label = { Text("Purpose (Mandatory)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = textFieldColors
+                )
+            }
             
-            Text(
-                text = "Category",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("CATEGORY", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
             
-            @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -196,20 +214,20 @@ fun ManualPaymentScreen(
                     Surface(
                         onClick = { selectedCategory = cat },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+                        color = if (isSelected) IosBlue else SurfaceDarkGray,
                     ) {
                         Text(
                             text = cat.displayName,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Button(
                 onClick = {
@@ -279,14 +297,16 @@ fun ManualPaymentScreen(
                     }
                 },
                 enabled = purpose.isNotBlank() && amount.isNotBlank() && upiId.isNotBlank(),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = IosBlue,
+                    disabledContainerColor = SurfaceDarkGray
                 )
             ) {
-                Text("Proceed to Pay", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Proceed to Pay", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
             }
             
             Spacer(modifier = Modifier.height(16.dp))

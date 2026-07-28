@@ -1,22 +1,31 @@
 package com.intentpay.ui.dashboard
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.intentpay.data.local.TransactionEntity
+import com.intentpay.ui.theme.IosBlue
+import com.intentpay.ui.theme.IosGreen
+import com.intentpay.ui.theme.SurfaceDarkGray
+import com.intentpay.ui.theme.TextSecondary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,80 +44,149 @@ fun DashboardScreen(
 
     val safeToday = todaySpending ?: 0.0
     val safeMonth = monthSpending ?: 0.0
-    val dailyLimit = budget?.dailyLimit ?: 500.0
     val monthlyBudget = budget?.monthlyBudget ?: 10000.0
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("IntentPay", fontWeight = FontWeight.Bold) },
+                title = { },
                 actions = {
-                    TextButton(onClick = onNavigateToSettings) {
-                        Text("Settings", color = MaterialTheme.colorScheme.onBackground)
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = IosBlue
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = SurfaceDarkGray.copy(alpha = 0.9f)
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToManualPayment,
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(16.dp)
+                containerColor = IosBlue,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier.padding(16.dp)
             ) {
-                Text("PAY", modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
             }
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Black
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // Budget Summary Cards
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                BudgetCard(
-                    title = "Today",
-                    spent = safeToday,
-                    limit = dailyLimit,
-                    modifier = Modifier.weight(1f)
-                )
-                BudgetCard(
-                    title = "This Month",
-                    spent = safeMonth,
-                    limit = monthlyBudget,
-                    modifier = Modifier.weight(1f)
+            item {
+                Text(
+                    text = "Summary",
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 24.dp)
                 )
             }
-            
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Recent Transactions",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            item {
+                // Main Balance / Budget Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceDarkGray)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            text = "Monthly Spending",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "₹$safeMonth",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "of ₹$monthlyBudget budget",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextSecondary
+                        )
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        // Today's spending row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Today",
+                                fontSize = 17.sp,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "₹$safeToday",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            item {
+                Text(
+                    text = "Recent Transactions",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(bottom = 100.dp)
-            ) {
-                items(transactions) { tx ->
-                    TransactionItem(tx)
+            if (transactions.isEmpty()) {
+                item {
+                    Text(
+                        text = "No recent transactions",
+                        color = TextSecondary,
+                        modifier = Modifier.padding(vertical = 24.dp)
+                    )
+                }
+            } else {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceDarkGray)
+                    ) {
+                        Column {
+                            transactions.forEachIndexed { index, tx ->
+                                TransactionRow(tx)
+                                if (index < transactions.size - 1) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(start = 64.dp),
+                                        color = Color(0x33FFFFFF),
+                                        thickness = 0.5.dp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(100.dp)) // FAB padding
                 }
             }
         }
@@ -116,59 +194,58 @@ fun DashboardScreen(
 }
 
 @Composable
-fun BudgetCard(title: String, spent: Double, limit: Double, modifier: Modifier = Modifier) {
-    val isExceeded = spent > limit
-    val color = if (isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-    
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(12.dp))
-            Text("₹$spent", style = MaterialTheme.typography.headlineMedium, color = color)
-            Text("/ ₹$limit", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-fun TransactionItem(tx: TransactionEntity) {
+fun TransactionRow(tx: TransactionEntity) {
     val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
     val dateStr = sdf.format(Date(tx.dateMillis))
+    
+    val isIncome = tx.isIncome
+    val amountColor = if (isIncome) IosGreen else Color.White
+    val sign = if (isIncome) "+" else "-"
 
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+            .clickable { /* Future detail view */ }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // Icon Placeholder
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(if (isIncome) IosGreen.copy(alpha = 0.2f) else IosBlue.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
         ) {
-            Column {
-                Text(text = tx.merchant ?: "Unknown Merchant", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = tx.purpose ?: tx.categoryName, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
-                    Text(text = " • $dateStr", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
             Text(
-                text = "-₹${tx.amount}",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 16.sp
+                text = (tx.merchant ?: "U").take(1).uppercase(),
+                color = if (isIncome) IosGreen else IosBlue,
+                fontWeight = FontWeight.Bold
             )
         }
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = tx.merchant ?: "Unknown",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "${tx.purpose ?: tx.categoryName} • $dateStr",
+                fontSize = 13.sp,
+                color = TextSecondary
+            )
+        }
+        
+        Text(
+            text = "$sign₹${tx.amount}",
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Medium,
+            color = amountColor
+        )
     }
 }

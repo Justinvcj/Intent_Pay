@@ -1,13 +1,17 @@
 package com.intentpay.data.parser
 
 object SmsParser {
-    data class ParsedSms(val amount: Double, val merchant: String?, val upiRef: String?)
+    data class ParsedSms(val amount: Double, val merchant: String?, val upiRef: String?, val isIncome: Boolean = false)
 
-    fun parseUpiDebitMessage(messageBody: String): ParsedSms? {
+    fun parseUpiMessage(messageBody: String): ParsedSms? {
         val lowerMsg = messageBody.lowercase()
         // Broad checks to avoid parsing irrelevant SMS
-        if (!lowerMsg.contains("debited") && !lowerMsg.contains("sent") && !lowerMsg.contains("paid")) return null
-        if (lowerMsg.contains("credited") || lowerMsg.contains("received")) return null // Ignore credits
+        val isDebit = lowerMsg.contains("debited") || lowerMsg.contains("sent") || lowerMsg.contains("paid")
+        val isCredit = lowerMsg.contains("credited") || lowerMsg.contains("received") || lowerMsg.contains("added")
+        
+        if (!isDebit && !isCredit) return null
+        
+        val isIncome = isCredit && !isDebit
 
         // Amount Regex to match Rs., INR, Rs, etc followed by digits
         val amountRegex = Regex("(?i)(?:rs\\.?|inr)\\s*([\\d,]+\\.?\\d*)")
@@ -32,6 +36,6 @@ object SmsParser {
             }
         }
 
-        return ParsedSms(amount, merchant?.trim(), upiRef)
+        return ParsedSms(amount, merchant?.trim(), upiRef, isIncome)
     }
 }

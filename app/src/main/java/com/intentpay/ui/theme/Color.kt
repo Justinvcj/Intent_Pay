@@ -2,10 +2,17 @@ package com.intentpay.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryBlue = Color(0xFF6C63FF)
-val CardDark = Color(0xFF1E1E1E)
-val BackgroundDark = Color(0xFF121212)
-val TextPrimary = Color(0xFFE0E0E0)
-val TextSecondary = Color(0xFFA0A0A0)
-val SuccessGreen = Color(0xFF03DAC6)
-val AlertRed = Color(0xFFFF6584)
+// Brand Colors from Stitch UI
+val PrimaryIndigo = Color(0xFF6366F1)
+val SecondaryAccent = Color(0xFFA5B4FC)
+val TertiaryRose = Color(0xFFF43F5E)
+
+// Neutral & Surface
+val BackgroundDeepDark = Color(0xFF121212)
+val SurfaceDark = Color(0xFF1E1E1E)
+val SurfaceContainerHigh = Color(0xFF2A2A2A)
+
+// Text Colors
+val TextPrimary = Color(0xFFE5E2E1)
+val TextVariant = Color(0xFFC7C4D7)
+val OutlineVariant = Color(0xFF464554)

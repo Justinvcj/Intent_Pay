@@ -1,15 +1,18 @@
 package com.intentpay.ui.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,25 +44,30 @@ fun DashboardScreen(
                 title = { Text("IntentPay", fontWeight = FontWeight.Bold) },
                 actions = {
                     TextButton(onClick = onNavigateToSettings) {
-                        Text("Settings")
+                        Text("Settings", color = MaterialTheme.colorScheme.onBackground)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToManualPayment,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text("PAY", modifier = Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                Text("PAY", modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
         ) {
             // Budget Summary Cards
             Row(
@@ -82,20 +90,22 @@ fun DashboardScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = "Recent Transactions",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp),
                 color = MaterialTheme.colorScheme.onBackground
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(bottom = 100.dp)
             ) {
                 items(transactions) { tx ->
                     TransactionItem(tx)
@@ -112,13 +122,15 @@ fun BudgetCard(title: String, spent: Double, limit: Double, modifier: Modifier =
     
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha=0.7f))
-            Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(12.dp))
             Text("₹$spent", style = MaterialTheme.typography.headlineMedium, color = color)
-            Text("/ ₹$limit", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha=0.5f))
+            Text("/ ₹$limit", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -131,8 +143,10 @@ fun TransactionItem(tx: TransactionEntity) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
     ) {
         Row(
             modifier = Modifier
@@ -142,15 +156,18 @@ fun TransactionItem(tx: TransactionEntity) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = tx.merchant ?: "Unknown Merchant", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = tx.purpose ?: tx.categoryName, fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
-                Text(text = dateStr, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha=0.5f))
+                Text(text = tx.merchant ?: "Unknown Merchant", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = tx.purpose ?: tx.categoryName, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+                    Text(text = " • $dateStr", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
             Text(
                 text = "-₹${tx.amount}",
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 18.sp
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 16.sp
             )
         }
     }

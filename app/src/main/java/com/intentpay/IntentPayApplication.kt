@@ -26,7 +26,8 @@ class IntentPayApplication : Application() {
                         id = 1,
                         monthlyBudget = 10000.0,
                         dailyLimit = 500.0,
-                        reflectionThreshold = 200.0
+                        reflectionThreshold = 200.0,
+                        googleSheetId = null
                     )
                 )
             }

@@ -28,7 +28,7 @@ class SmsReceiver : BroadcastReceiver() {
                 val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
                 for (msg in messages) {
                     val body = msg.displayMessageBody
-                    val parsed = SmsParser.parseUpiDebitMessage(body ?: "")
+                    val parsed = SmsParser.parseUpiMessage(body ?: "")
                     if (parsed != null) {
                         val thresholdAmount = repository.getBudgetSync()?.reflectionThreshold ?: 200.0
                         
@@ -40,7 +40,8 @@ class SmsReceiver : BroadcastReceiver() {
                             purpose = null,
                             categoryName = Category.UNCATEGORIZED.name,
                             upiRefId = parsed.upiRef,
-                            autoDetected = true
+                            autoDetected = true,
+                            isIncome = parsed.isIncome
                         )
                         
                         val insertedId = repository.deduplicateAndInsert(entity)

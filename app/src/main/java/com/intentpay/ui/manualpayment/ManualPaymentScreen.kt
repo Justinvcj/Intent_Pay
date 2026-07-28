@@ -2,9 +2,12 @@ package com.intentpay.ui.manualpayment
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -13,9 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.intentpay.domain.models.Category
 import kotlinx.coroutines.launch
-import android.util.Log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +33,6 @@ fun ManualPaymentScreen(
     var merchantName by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var purpose by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf(Category.UNCATEGORIZED) }
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
     var scannedRawUri by remember { mutableStateOf<String?>(null) }
@@ -60,7 +62,6 @@ fun ManualPaymentScreen(
             if (qrResult.startsWith("upi://pay", ignoreCase = true)) {
                 try {
                     val uri = Uri.parse(qrResult)
-                    // Uri.getQueryParameter implicitly handles URL decoding
                     val pa = uri.getQueryParameter("pa")
                     val pn = uri.getQueryParameter("pn")
                     val am = uri.getQueryParameter("am")
@@ -97,16 +98,28 @@ fun ManualPaymentScreen(
         )
     }
 
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = MaterialTheme.colorScheme.primary,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+        focusedLabelColor = MaterialTheme.colorScheme.primary,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Pay with Purpose") },
+                title = { Text("Manual Payment", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         }
     ) { padding ->
@@ -114,69 +127,83 @@ fun ManualPaymentScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Button(
                 onClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Text("Scan QR", color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Bold)
+                Text("Scan QR Code", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = amount,
                 onValueChange = { amount = it },
                 label = { Text("Amount (₹)") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
             )
             OutlinedTextField(
                 value = merchantName,
                 onValueChange = { merchantName = it },
                 label = { Text("Merchant Name") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
             )
             OutlinedTextField(
                 value = upiId,
                 onValueChange = { upiId = it },
                 label = { Text("Merchant UPI ID") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
             )
             OutlinedTextField(
                 value = purpose,
                 onValueChange = { purpose = it },
                 label = { Text("Purpose (Mandatory)") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = textFieldColors
             )
             
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it }
+            Text(
+                text = "Category",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
-                    value = selectedCategory.displayName,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    Category.values().forEach { cat ->
-                        DropdownMenuItem(
-                            text = { Text(cat.displayName) },
-                            onClick = {
-                                selectedCategory = cat
-                                expanded = false
-                            }
+                Category.values().forEach { cat ->
+                    val isSelected = selectedCategory == cat
+                    Surface(
+                        onClick = { selectedCategory = cat },
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Text(
+                            text = cat.displayName,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                     }
                 }
@@ -247,16 +274,22 @@ fun ManualPaymentScreen(
                         try {
                             launcher.launch(intent)
                         } catch (e: Exception) {
-                            // If no UPI app is installed
                             onBack()
                         }
                     }
                 },
                 enabled = purpose.isNotBlank() && amount.isNotBlank() && upiId.isNotBlank(),
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
             ) {
-                Text("Proceed to Pay", fontWeight = FontWeight.Bold)
+                Text("Proceed to Pay", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
+            
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

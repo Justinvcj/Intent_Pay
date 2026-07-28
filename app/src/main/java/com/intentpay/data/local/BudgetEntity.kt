@@ -9,5 +9,6 @@ data class BudgetEntity(
     val id: Int = 1, // Singleton
     val monthlyBudget: Double,
     val dailyLimit: Double,
-    val reflectionThreshold: Double
+    val reflectionThreshold: Double,
+    val googleSheetId: String? = null
 )

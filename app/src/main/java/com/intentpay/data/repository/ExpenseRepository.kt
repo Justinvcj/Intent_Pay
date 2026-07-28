@@ -5,6 +5,8 @@ import com.intentpay.data.local.BudgetEntity
 import com.intentpay.data.local.TransactionDao
 import com.intentpay.data.local.TransactionEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class ExpenseRepository(
@@ -32,6 +34,14 @@ class ExpenseRepository(
     
     suspend fun getBudgetSync(): BudgetEntity? {
         return budgetDao.getBudgetDetailsSync()
+    }
+
+    suspend fun getUnsyncedTransactions(): List<TransactionEntity> {
+        return transactionDao.getUnsyncedTransactions()
+    }
+
+    suspend fun markAsSynced(ids: List<Long>) = withContext(Dispatchers.IO) {
+        transactionDao.markAsSynced(ids)
     }
 
     fun getTodaySpending(): Flow<Double?> {

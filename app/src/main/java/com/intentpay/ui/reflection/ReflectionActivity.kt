@@ -8,7 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.intentpay.IntentPayApplication
+import com.intentpay.data.repository.SyncWorker
 import com.intentpay.ui.theme.IntentPayTheme
 
 class ReflectionActivity : ComponentActivity() {
@@ -31,7 +34,11 @@ class ReflectionActivity : ComponentActivity() {
                     ReflectionScreen(
                         viewModel = viewModel,
                         amount = amount,
-                        onFinish = { finish() }
+                        onFinish = { 
+                            val workRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                            WorkManager.getInstance(this@ReflectionActivity).enqueue(workRequest)
+                            finish() 
+                        }
                     )
                 }
             }

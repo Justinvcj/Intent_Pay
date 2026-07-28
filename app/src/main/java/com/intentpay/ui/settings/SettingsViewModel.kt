@@ -29,9 +29,17 @@ class SettingsViewModel(private val repository: ExpenseRepository) : ViewModel()
                     id = 1,
                     monthlyBudget = monthly,
                     dailyLimit = daily,
-                    reflectionThreshold = reflection
+                    reflectionThreshold = reflection,
+                    googleSheetId = _budget.value?.googleSheetId
                 )
             )
+        }
+    }
+
+    fun updateSheetId(sheetId: String) {
+        viewModelScope.launch {
+            val current = _budget.value ?: return@launch
+            repository.setBudgetConfig(current.copy(googleSheetId = sheetId))
         }
     }
 }

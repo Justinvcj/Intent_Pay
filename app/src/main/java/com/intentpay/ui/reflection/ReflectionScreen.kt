@@ -1,10 +1,11 @@
 package com.intentpay.ui.reflection
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +25,6 @@ fun ReflectionScreen(
     onFinish: () -> Unit
 ) {
     var purpose by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf(Category.UNCATEGORIZED) }
     
     val isSaved by viewModel.isSaved.collectAsState()
@@ -36,15 +36,7 @@ fun ReflectionScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Reflection Required") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.error
-                )
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -52,85 +44,92 @@ fun ReflectionScreen(
                 .padding(paddingValues)
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(64.dp)
-            )
+            Spacer(modifier = Modifier.height(40.dp))
             
             Text(
-                text = "High Value Transaction Detected",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            
-            Text(
-                text = "₹$amount",
+                text = "Hold on.",
                 style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.error
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Start)
             )
             
+            Spacer(modifier = Modifier.height(8.dp))
+            
             Text(
-                text = "Take a moment to reflect on this expense.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.Gray
+                text = "What was this ₹$amount for?",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.align(Alignment.Start)
             )
+            
+            Spacer(modifier = Modifier.height(32.dp))
             
             OutlinedTextField(
                 value = purpose,
                 onValueChange = { purpose = it },
-                label = { Text("What was this for? (Mandatory)") },
+                label = { Text("Justification (Required)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Gray
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
             
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it }
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(
+                text = "Quick Select",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
-                    value = selectedCategory.displayName,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    Category.values().forEach { cat ->
-                        DropdownMenuItem(
-                            text = { Text(cat.displayName) },
-                            onClick = {
-                                selectedCategory = cat
-                                expanded = false
-                            }
+                Category.values().forEach { cat ->
+                    val isSelected = selectedCategory == cat
+                    Surface(
+                        onClick = { selectedCategory = cat },
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Text(
+                            text = cat.displayName,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                     }
                 }
             }
             
             Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
             
             Button(
                 onClick = { viewModel.saveReflection(purpose, selectedCategory) },
                 enabled = purpose.isNotBlank(),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
                 Text("Save & Continue", fontSize = 18.sp, fontWeight = FontWeight.Bold)

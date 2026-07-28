@@ -13,5 +13,7 @@ data class TransactionEntity(
     val purpose: String?,
     val categoryName: String,
     val upiRefId: String?,
-    val autoDetected: Boolean
+    val autoDetected: Boolean,
+    val isIncome: Boolean = false,
+    val syncedWithSheets: Boolean = false
 )

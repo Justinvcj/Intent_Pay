@@ -31,6 +31,8 @@ import com.intentpay.ui.settings.SettingsViewModelFactory
 import com.intentpay.ui.splash.AnimatedSplashScreen
 import com.intentpay.ui.theme.IntentPayTheme
 import com.intentpay.ui.pending.PendingReviewViewModelFactory
+import com.intentpay.ui.analytics.AnalyticsViewModelFactory
+import com.intentpay.ui.history.HistoryViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +48,8 @@ class MainActivity : ComponentActivity() {
         val manualPayFactory = ManualPaymentViewModelFactory(repository)
         val settingsFactory = SettingsViewModelFactory(repository)
         val pendingReviewFactory = PendingReviewViewModelFactory(repository, app.merchantMemory)
+        val analyticsFactory = AnalyticsViewModelFactory(repository)
+        val historyFactory = HistoryViewModelFactory(repository)
 
         setContent {
             IntentPayTheme {
@@ -66,7 +70,9 @@ class MainActivity : ComponentActivity() {
                             dashboardFactory = dashboardFactory,
                             manualPayFactory = manualPayFactory,
                             settingsFactory = settingsFactory,
-                            pendingReviewFactory = pendingReviewFactory
+                            pendingReviewFactory = pendingReviewFactory,
+                            analyticsFactory = analyticsFactory,
+                            historyFactory = historyFactory
                         )
                     }
                 }

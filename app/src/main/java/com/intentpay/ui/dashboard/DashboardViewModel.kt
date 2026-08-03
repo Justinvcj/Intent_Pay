@@ -23,6 +23,9 @@ class DashboardViewModel(repository: TransactionRepository) : ViewModel() {
 
     val monthSpending: StateFlow<Double?> = repository.getMonthSpending()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    val uncategorizedCount: StateFlow<Int> = repository.getUncategorizedCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 }
 
 class DashboardViewModelFactory(

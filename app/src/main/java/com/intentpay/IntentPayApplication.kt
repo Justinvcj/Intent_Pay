@@ -10,6 +10,11 @@ import kotlinx.coroutines.launch
 
 import com.intentpay.categorization.MerchantMemory
 import com.intentpay.data.detection.UnifiedTransactionDetector
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.intentpay.workers.ReminderWorker
+import java.util.concurrent.TimeUnit
 
 class IntentPayApplication : Application() {
 
@@ -38,5 +43,13 @@ class IntentPayApplication : Application() {
                 )
             }
         }
+        
+        // Setup Reminders
+        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS).build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "daily_reminders",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
     }
 }

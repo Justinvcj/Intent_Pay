@@ -5,6 +5,7 @@
     <!-- Permissions for SMS detection -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
     <!-- Permissions for Google Sheets & Auth -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -46,13 +47,22 @@
         </activity>
 
         <receiver
-            android:name=".data.parser.SmsReceiver"
+            android:name=".data.detection.SmsReceiver"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+        
+        <service android:name=".data.detection.PaymentNotificationListener"
+            android:label="IntentPay Notification Capture"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
         
     </application>
 

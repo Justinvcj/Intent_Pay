@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,12 +36,14 @@ import java.util.Locale
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     onNavigateToManualPayment: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToPendingReview: () -> Unit
 ) {
     val transactions by viewModel.allTransactions.collectAsState()
     val budget by viewModel.budgetDetails.collectAsState()
     val todaySpending by viewModel.todaySpending.collectAsState()
     val monthSpending by viewModel.monthSpending.collectAsState()
+    val pendingCount by viewModel.uncategorizedCount.collectAsState()
 
     val safeToday = todaySpending ?: 0.0
     val safeMonth = monthSpending ?: 0.0
@@ -83,6 +86,31 @@ fun DashboardScreen(
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
+            }
+
+            if (pendingCount > 0) {
+                item {
+                    GlassCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp)
+                            .clickable { onNavigateToPendingReview() },
+                        cornerRadius = 16.dp,
+                        backgroundColor = Color(0x33FF9500) // Subtle orange tint
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Rounded.Warning, contentDescription = "Warning", tint = Color(0xFFFF9F0A))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pending Review", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                                Text("$pendingCount uncategorized transactions", color = TextSecondary, fontSize = 14.sp)
+                            }
+                        }
+                    }
+                }
             }
 
             item {

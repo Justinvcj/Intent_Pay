@@ -36,8 +36,10 @@ import com.intentpay.ui.manualpayment.ManualPaymentViewModel
 import com.intentpay.ui.manualpayment.ManualPaymentViewModelFactory
 import com.intentpay.ui.qrscanner.QrScannerScreen
 import com.intentpay.ui.settings.SettingsScreen
-import com.intentpay.ui.settings.SettingsViewModel
 import com.intentpay.ui.settings.SettingsViewModelFactory
+import com.intentpay.ui.pending.PendingReviewScreen
+import com.intentpay.ui.pending.PendingReviewViewModel
+import com.intentpay.ui.pending.PendingReviewViewModelFactory
 import com.intentpay.ui.theme.GlassSurface
 import com.intentpay.ui.theme.IosBlue
 import com.intentpay.ui.theme.TextSecondary
@@ -46,7 +48,8 @@ import com.intentpay.ui.theme.TextSecondary
 fun MainScreen(
     dashboardFactory: DashboardViewModelFactory,
     manualPayFactory: ManualPaymentViewModelFactory,
-    settingsFactory: SettingsViewModelFactory
+    settingsFactory: SettingsViewModelFactory,
+    pendingReviewFactory: PendingReviewViewModelFactory
 ) {
     val navController = rememberNavController()
     
@@ -124,7 +127,8 @@ fun MainScreen(
                     DashboardScreen(
                         viewModel = viewModel,
                         onNavigateToManualPayment = { navController.navigate("manual_payment") },
-                        onNavigateToSettings = { navController.navigate("settings") }
+                        onNavigateToSettings = { navController.navigate("settings") },
+                        onNavigateToPendingReview = { navController.navigate("pending_review") }
                     )
                 }
                 
@@ -152,8 +156,16 @@ fun MainScreen(
                 }
                 
                 composable("settings") {
-                    val viewModel: SettingsViewModel = viewModel(factory = settingsFactory)
+                    val viewModel: com.intentpay.ui.settings.SettingsViewModel = viewModel(factory = settingsFactory)
                     SettingsScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable("pending_review") {
+                    val viewModel: PendingReviewViewModel = viewModel(factory = pendingReviewFactory)
+                    PendingReviewScreen(
                         viewModel = viewModel,
                         onBack = { navController.popBackStack() }
                     )

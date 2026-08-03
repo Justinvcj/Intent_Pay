@@ -1,4 +1,4 @@
-package com.intentpay.data.parser
+package com.intentpay.data.detection
 
 object SmsParser {
     data class ParsedSms(val amount: Double, val merchant: String?, val upiRef: String?, val isIncome: Boolean = false)

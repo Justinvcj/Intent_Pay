@@ -1,13 +1,13 @@
 package com.intentpay.ui.settings
 
-import androidx.compose.foundation.background
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -17,15 +17,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.sheets.v4.SheetsScopes
+import com.intentpay.ui.components.GlassButton
+import com.intentpay.ui.components.GlassCard
+import com.intentpay.ui.components.GlassTextField
 import com.intentpay.ui.theme.IosBlue
 import com.intentpay.ui.theme.IosRed
-import com.intentpay.ui.theme.SurfaceDarkGray
 import com.intentpay.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,29 +66,18 @@ fun SettingsScreen(
             monthlyInput = it.monthlyBudget.toString()
             dailyInput = it.dailyLimit.toString()
             reflectionInput = it.reflectionThreshold.toString()
-            sheetIdInput = it.googleSheetId ?: ""
+            sheetIdInput = it.googleDriveFolderId ?: ""
         }
     }
 
-    val textFieldColors = TextFieldDefaults.colors(
-        focusedContainerColor = SurfaceDarkGray,
-        unfocusedContainerColor = SurfaceDarkGray,
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        focusedTextColor = Color.White,
-        unfocusedTextColor = Color.White,
-        focusedLabelColor = IosBlue,
-        unfocusedLabelColor = TextSecondary
-    )
-
     Scaffold(
-        containerColor = Color.Black,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Settings", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color.White) },
+                title = { Text("Settings", fontWeight = FontWeight.SemiBold, fontSize = 17.sp, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = IosBlue)
+                        Icon(Icons.Rounded.ArrowBack, contentDescription = "Back", tint = IosBlue)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -106,63 +95,61 @@ fun SettingsScreen(
         ) {
             Text("BUDGET LIMITS", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SurfaceDarkGray, RoundedCornerShape(10.dp))
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                cornerRadius = 12.dp
             ) {
-                TextField(
-                    value = monthlyInput,
-                    onValueChange = { monthlyInput = it },
-                    label = { Text("Monthly Budget (₹)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
-                )
-                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-                
-                TextField(
-                    value = dailyInput,
-                    onValueChange = { dailyInput = it },
-                    label = { Text("Daily Soft Limit (₹)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
-                )
-                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-                
-                TextField(
-                    value = reflectionInput,
-                    onValueChange = { reflectionInput = it },
-                    label = { Text("Reflection Threshold (₹)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
-                )
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    GlassTextField(
+                        value = monthlyInput,
+                        onValueChange = { monthlyInput = it },
+                        placeholder = "Monthly Budget (₹)",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 0.dp
+                    )
+                    HorizontalDivider(color = Color(0x1AFFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
+                    
+                    GlassTextField(
+                        value = dailyInput,
+                        onValueChange = { dailyInput = it },
+                        placeholder = "Daily Soft Limit (₹)",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 0.dp
+                    )
+                    HorizontalDivider(color = Color(0x1AFFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
+                    
+                    GlassTextField(
+                        value = reflectionInput,
+                        onValueChange = { reflectionInput = it },
+                        placeholder = "Reflection Threshold (₹)",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 0.dp
+                    )
+                }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("GOOGLE SHEETS SYNC", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("GOOGLE DRIVE SYNC", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
             
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SurfaceDarkGray, RoundedCornerShape(10.dp))
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                cornerRadius = 12.dp
             ) {
-                TextField(
-                    value = sheetIdInput,
-                    onValueChange = { sheetIdInput = it },
-                    label = { Text("Google Sheet ID") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
-                )
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    GlassTextField(
+                        value = sheetIdInput,
+                        onValueChange = { sheetIdInput = it },
+                        placeholder = "Google Drive Folder ID",
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 0.dp
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             if (signedInEmail != null) {
                 Text(
@@ -171,22 +158,18 @@ fun SettingsScreen(
                     fontSize = 13.sp,
                     modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
                 )
-                Button(
+                GlassButton(
+                    text = "Sign Out",
                     onClick = {
                         GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut().addOnCompleteListener {
                             signedInEmail = null
                         }
                     },
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SurfaceDarkGray)
-                ) {
-                    Text("Sign Out", color = IosRed, fontSize = 17.sp)
-                }
+                    isPrimary = false
+                )
             } else {
-                Button(
+                GlassButton(
+                    text = "Sign In with Google",
                     onClick = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestEmail()
@@ -195,19 +178,14 @@ fun SettingsScreen(
                         val client = GoogleSignIn.getClient(context, gso)
                         signInLauncher.launch(client.signInIntent)
                     },
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SurfaceDarkGray)
-                ) {
-                    Text("Sign In with Google", color = IosBlue, fontSize = 17.sp)
-                }
+                    isPrimary = false
+                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Button(
+            GlassButton(
+                text = "Save Settings",
                 onClick = {
                     viewModel.updateBudget(
                         monthly = monthlyInput.toDoubleOrNull() ?: 10000.0,
@@ -217,16 +195,10 @@ fun SettingsScreen(
                     viewModel.updateSheetId(sheetIdInput)
                     onBack()
                 },
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = IosBlue)
-            ) {
-                Text("Save Settings", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-            }
+                isPrimary = true
+            )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(100.dp)) // padding for bottom bar
         }
     }
 }

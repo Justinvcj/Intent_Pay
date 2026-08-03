@@ -5,11 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [TransactionEntity::class, BudgetEntity::class], version = 1, exportSchema = false)
+@Database(entities = [TransactionEntity::class, BudgetEntity::class, MerchantRuleEntity::class], version = 2, exportSchema = false)
 abstract class IntentPayDatabase : RoomDatabase() {
 
     abstract fun transactionDao(): TransactionDao
     abstract fun budgetDao(): BudgetDao
+    abstract fun merchantRuleDao(): MerchantRuleDao
 
     companion object {
         @Volatile
@@ -21,7 +22,9 @@ abstract class IntentPayDatabase : RoomDatabase() {
                     context.applicationContext,
                     IntentPayDatabase::class.java,
                     "intentpay_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

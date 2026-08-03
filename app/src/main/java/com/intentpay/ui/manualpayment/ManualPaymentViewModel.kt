@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.intentpay.data.local.TransactionEntity
-import com.intentpay.data.repository.ExpenseRepository
+import com.intentpay.data.repository.TransactionRepository
 import com.intentpay.domain.models.Category
 import kotlinx.coroutines.launch
 
-class ManualPaymentViewModel(private val repository: ExpenseRepository) : ViewModel() {
+class ManualPaymentViewModel(private val repository: TransactionRepository) : ViewModel() {
     fun recordPlannedTransaction(amount: Double, merchant: String, purpose: String, category: Category) {
         viewModelScope.launch {
             repository.insertTransaction(
@@ -27,7 +27,7 @@ class ManualPaymentViewModel(private val repository: ExpenseRepository) : ViewMo
 }
 
 class ManualPaymentViewModelFactory(
-    private val repository: ExpenseRepository
+    private val repository: TransactionRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ManualPaymentViewModel::class.java)) {

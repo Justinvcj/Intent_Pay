@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
-class ExpenseRepository(
+class TransactionRepository(
     private val transactionDao: TransactionDao,
     private val budgetDao: BudgetDao
 ) {
@@ -43,6 +43,16 @@ class ExpenseRepository(
     suspend fun markAsSynced(ids: List<Long>) = withContext(Dispatchers.IO) {
         transactionDao.markAsSynced(ids)
     }
+
+    fun getUncategorized(): Flow<List<TransactionEntity>> = transactionDao.getUncategorized()
+    
+    fun getUncategorizedCount(): Flow<Int> = transactionDao.getUncategorizedCount()
+    
+    suspend fun getUncategorizedSince(since: Long) = transactionDao.getUncategorizedSince(since)
+    
+    suspend fun getUncategorizedBefore(before: Long) = transactionDao.getUncategorizedBefore(before)
+    
+    suspend fun incrementReminderCount(ids: List<Long>) = transactionDao.incrementReminderCount(ids)
 
     fun getTodaySpending(): Flow<Double?> {
         val calendar = Calendar.getInstance()

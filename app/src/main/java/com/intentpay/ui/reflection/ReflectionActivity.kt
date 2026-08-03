@@ -22,7 +22,7 @@ class ReflectionActivity : ComponentActivity() {
         val amount = intent.getDoubleExtra("AMOUNT", 0.0)
         
         val app = application as IntentPayApplication
-        val factory = ReflectionViewModelFactory(app.expenseRepository, transactionId)
+        val factory = ReflectionViewModelFactory(app.transactionRepository, app.merchantMemory, transactionId)
 
         setContent {
             IntentPayTheme {

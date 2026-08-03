@@ -1,15 +1,14 @@
 package com.intentpay.ui.dashboard
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,14 +16,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.intentpay.data.local.TransactionEntity
+import com.intentpay.ui.components.GlassCard
 import com.intentpay.ui.theme.IosBlue
 import com.intentpay.ui.theme.IosGreen
-import com.intentpay.ui.theme.SurfaceDarkGray
 import com.intentpay.ui.theme.TextSecondary
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,18 +50,9 @@ fun DashboardScreen(
         topBar = {
             TopAppBar(
                 title = { },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = IosBlue
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
-                    scrolledContainerColor = SurfaceDarkGray.copy(alpha = 0.9f)
+                    scrolledContainerColor = Color.Transparent
                 )
             )
         },
@@ -71,12 +62,12 @@ fun DashboardScreen(
                 containerColor = IosBlue,
                 contentColor = Color.White,
                 shape = CircleShape,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(bottom = 96.dp, end = 16.dp) // Adjusted padding for floating nav
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+                Icon(Icons.Rounded.Add, contentDescription = "Add Transaction")
             }
         },
-        containerColor = Color.Black
+        containerColor = Color.Transparent
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -96,22 +87,21 @@ fun DashboardScreen(
 
             item {
                 // Main Balance / Budget Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceDarkGray)
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth().animateContentSize(),
+                    cornerRadius = 24.dp
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Text(
                             text = "Monthly Spending",
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Light,
                             color = TextSecondary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "₹$safeMonth",
-                            fontSize = 32.sp,
+                            fontSize = 36.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -119,11 +109,11 @@ fun DashboardScreen(
                         Text(
                             text = "of ₹$monthlyBudget budget",
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Light,
                             color = TextSecondary
                         )
                         
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(32.dp))
                         
                         // Today's spending row
                         Row(
@@ -134,12 +124,13 @@ fun DashboardScreen(
                             Text(
                                 text = "Today",
                                 fontSize = 17.sp,
-                                color = Color.White
+                                fontWeight = FontWeight.Light,
+                                color = TextSecondary
                             )
                             Text(
                                 text = "₹$safeToday",
                                 fontSize = 17.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Medium,
                                 color = Color.White
                             )
                         }
@@ -154,7 +145,7 @@ fun DashboardScreen(
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(start = 8.dp, bottom = 16.dp)
                 )
             }
 
@@ -163,30 +154,29 @@ fun DashboardScreen(
                     Text(
                         text = "No recent transactions",
                         color = TextSecondary,
-                        modifier = Modifier.padding(vertical = 24.dp)
+                        modifier = Modifier.padding(start = 8.dp, top = 24.dp, bottom = 24.dp)
                     )
                 }
             } else {
                 item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceDarkGray)
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth().animateContentSize(),
+                        cornerRadius = 20.dp
                     ) {
                         Column {
                             transactions.forEachIndexed { index, tx ->
                                 TransactionRow(tx)
                                 if (index < transactions.size - 1) {
                                     HorizontalDivider(
-                                        modifier = Modifier.padding(start = 64.dp),
-                                        color = Color(0x33FFFFFF),
+                                        modifier = Modifier.padding(start = 72.dp),
+                                        color = Color(0x1AFFFFFF),
                                         thickness = 0.5.dp
                                     )
                                 }
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(100.dp)) // FAB padding
+                    Spacer(modifier = Modifier.height(140.dp)) // Padding for floating nav
                 }
             }
         }
@@ -202,29 +192,36 @@ fun TransactionRow(tx: TransactionEntity) {
     val amountColor = if (isIncome) IosGreen else Color.White
     val sign = if (isIncome) "+" else "-"
 
+    val avatarGradient = if (isIncome) {
+        Brush.linearGradient(listOf(Color(0xFF32D74B), Color(0xFF0F5A1F)))
+    } else {
+        Brush.linearGradient(listOf(Color(0xFF0A84FF), Color(0xFF053E7A)))
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { /* Future detail view */ }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon Placeholder
+        // Icon Placeholder with Gradient
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(44.dp)
                 .clip(CircleShape)
-                .background(if (isIncome) IosGreen.copy(alpha = 0.2f) else IosBlue.copy(alpha = 0.2f)),
+                .background(avatarGradient),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = (tx.merchant ?: "U").take(1).uppercase(),
-                color = if (isIncome) IosGreen else IosBlue,
-                fontWeight = FontWeight.Bold
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
             )
         }
         
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -233,10 +230,11 @@ fun TransactionRow(tx: TransactionEntity) {
                 fontWeight = FontWeight.Medium,
                 color = Color.White
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${tx.purpose ?: tx.categoryName} • $dateStr",
-                fontSize = 13.sp,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Light,
                 color = TextSecondary
             )
         }

@@ -15,13 +15,13 @@ class SyncWorker(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val app = applicationContext as IntentPayApplication
-        val repository = app.expenseRepository
+        val repository = app.transactionRepository
         val googleSheetsService = GoogleSheetsService(applicationContext)
 
         try {
             val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
             val budget = repository.getBudgetSync()
-            val sheetId = budget?.googleSheetId
+            val sheetId = budget?.googleDriveFolderId
 
             if (account == null || sheetId.isNullOrEmpty()) {
                 return@withContext Result.success() // Can't sync without auth/id

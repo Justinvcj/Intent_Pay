@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.intentpay.data.local.BudgetEntity
-import com.intentpay.data.repository.ExpenseRepository
+import com.intentpay.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: ExpenseRepository) : ViewModel() {
+class SettingsViewModel(private val repository: TransactionRepository) : ViewModel() {
     
     private val _budget = MutableStateFlow<BudgetEntity?>(null)
     val budget: StateFlow<BudgetEntity?> = _budget
@@ -30,7 +30,7 @@ class SettingsViewModel(private val repository: ExpenseRepository) : ViewModel()
                     monthlyBudget = monthly,
                     dailyLimit = daily,
                     reflectionThreshold = reflection,
-                    googleSheetId = _budget.value?.googleSheetId
+                    googleDriveFolderId = _budget.value?.googleDriveFolderId
                 )
             )
         }
@@ -39,13 +39,13 @@ class SettingsViewModel(private val repository: ExpenseRepository) : ViewModel()
     fun updateSheetId(sheetId: String) {
         viewModelScope.launch {
             val current = _budget.value ?: return@launch
-            repository.setBudgetConfig(current.copy(googleSheetId = sheetId))
+            repository.setBudgetConfig(current.copy(googleDriveFolderId = sheetId))
         }
     }
 }
 
 class SettingsViewModelFactory(
-    private val repository: ExpenseRepository
+    private val repository: TransactionRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {

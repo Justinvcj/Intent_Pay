@@ -10,5 +10,11 @@ data class BudgetEntity(
     val monthlyBudget: Double,
     val dailyLimit: Double,
     val reflectionThreshold: Double,
-    val googleSheetId: String? = null
+    val endOfDayReminderHour: Int = 21,
+    val endOfDayReminderMinute: Int = 0,
+    val enableThreeDayReminder: Boolean = true,
+    val enableWeeklyReport: Boolean = true,
+    val weeklyReportDay: Int = 1, // Calendar.SUNDAY = 1
+    val googleDriveFolderId: String? = null,
+    val exportTemplatePath: String? = null
 )

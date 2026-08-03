@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         val app = application as IntentPayApplication
-        val repository = app.expenseRepository
+        val repository = app.transactionRepository
 
         val dashboardFactory = DashboardViewModelFactory(repository)
         val manualPayFactory = ManualPaymentViewModelFactory(repository)
@@ -60,49 +60,11 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     } else {
-                        val navController = rememberNavController()
-                        
-                        NavHost(navController = navController, startDestination = "dashboard") {
-                            composable("dashboard") {
-                                val viewModel: DashboardViewModel = viewModel(factory = dashboardFactory)
-                                DashboardScreen(
-                                    viewModel = viewModel,
-                                    onNavigateToManualPayment = { navController.navigate("manual_payment") },
-                                    onNavigateToSettings = { navController.navigate("settings") }
-                                )
-                            }
-                            
-                            composable("manual_payment") { backStackEntry ->
-                                val viewModel: ManualPaymentViewModel = viewModel(factory = manualPayFactory)
-                                val qrResult by backStackEntry.savedStateHandle.getStateFlow<String?>("qr_result", null).collectAsState()
-                                
-                                ManualPaymentScreen(
-                                    viewModel = viewModel,
-                                    qrResult = qrResult,
-                                    onClearQrResult = { backStackEntry.savedStateHandle.remove<String>("qr_result") },
-                                    onNavigateToScanner = { navController.navigate("qr_scanner") },
-                                    onBack = { navController.popBackStack() }
-                                )
-                            }
-                            
-                            composable("qr_scanner") {
-                                QrScannerScreen(
-                                    onScanSuccess = { result ->
-                                        navController.previousBackStackEntry?.savedStateHandle?.set("qr_result", result)
-                                        navController.popBackStack()
-                                    },
-                                    onBack = { navController.popBackStack() }
-                                )
-                            }
-                            
-                            composable("settings") {
-                                val viewModel: SettingsViewModel = viewModel(factory = settingsFactory)
-                                SettingsScreen(
-                                    viewModel = viewModel,
-                                    onBack = { navController.popBackStack() }
-                                )
-                            }
-                        }
+                        MainScreen(
+                            dashboardFactory = dashboardFactory,
+                            manualPayFactory = manualPayFactory,
+                            settingsFactory = settingsFactory
+                        )
                     }
                 }
             }

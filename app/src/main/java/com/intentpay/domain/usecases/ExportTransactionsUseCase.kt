@@ -3,7 +3,7 @@ package com.intentpay.domain.usecases
 import android.content.Context
 import android.os.Environment
 import com.intentpay.data.local.TransactionEntity
-import com.intentpay.data.repository.ExpenseRepository
+import com.intentpay.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.first
 import java.io.File
 import java.io.FileWriter
@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ExportTransactionsUseCase(private val repository: ExpenseRepository) {
+class ExportTransactionsUseCase(private val repository: TransactionRepository) {
 
     suspend fun exportToCsv(context: Context): Result<String> {
         return try {

@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.intentpay.data.local.BudgetEntity
 import com.intentpay.data.local.TransactionEntity
-import com.intentpay.data.repository.ExpenseRepository
+import com.intentpay.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
-class DashboardViewModel(repository: ExpenseRepository) : ViewModel() {
+class DashboardViewModel(repository: TransactionRepository) : ViewModel() {
 
     val allTransactions: StateFlow<List<TransactionEntity>> = repository.allTransactions
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -26,7 +26,7 @@ class DashboardViewModel(repository: ExpenseRepository) : ViewModel() {
 }
 
 class DashboardViewModelFactory(
-    private val repository: ExpenseRepository
+    private val repository: TransactionRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(DashboardViewModel::class.java)) {

@@ -31,9 +31,24 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE autoDetected = 1 AND amount = :amount AND dateMillis BETWEEN :startWindow AND :endWindow LIMIT 1")
     suspend fun findSimilarAutoDetected(amount: Double, startWindow: Long, endWindow: Long): TransactionEntity?
 
-    @Query("SELECT * FROM transactions WHERE syncedWithSheets = 0 ORDER BY dateMillis ASC")
+    @Query("SELECT * FROM transactions WHERE syncedWithDrive = 0 ORDER BY dateMillis ASC")
     suspend fun getUnsyncedTransactions(): List<TransactionEntity>
 
-    @Query("UPDATE transactions SET syncedWithSheets = 1 WHERE id IN (:ids)")
-    fun markAsSynced(ids: List<Long>)
+    @Query("UPDATE transactions SET syncedWithDrive = 1 WHERE id IN (:ids)")
+    suspend fun markAsSynced(ids: List<Long>): Int
+
+    @Query("SELECT * FROM transactions WHERE needsReview = 1 ORDER BY dateMillis DESC")
+    fun getUncategorized(): Flow<List<TransactionEntity>>
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE needsReview = 1")
+    fun getUncategorizedCount(): Flow<Int>
+
+    @Query("SELECT * FROM transactions WHERE needsReview = 1 AND dateMillis >= :since ORDER BY dateMillis DESC")
+    suspend fun getUncategorizedSince(since: Long): List<TransactionEntity>
+
+    @Query("SELECT * FROM transactions WHERE needsReview = 1 AND dateMillis <= :before ORDER BY dateMillis DESC")
+    suspend fun getUncategorizedBefore(before: Long): List<TransactionEntity>
+
+    @Query("UPDATE transactions SET reminderCount = reminderCount + 1 WHERE id IN (:ids)")
+    suspend fun incrementReminderCount(ids: List<Long>): Int
 }

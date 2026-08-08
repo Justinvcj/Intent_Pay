@@ -10,6 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import android.widget.Toast
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +62,34 @@ fun SettingsScreen(
             signedInEmail = account?.email
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+    
+    val scope = rememberCoroutineScope()
+    
+    var pendingExportFormat by remember { mutableStateOf<String?>(null) }
+    
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("*/*")
+    ) { uri ->
+        uri?.let {
+            pendingExportFormat?.let { format ->
+                scope.launch {
+                    try {
+                        val exportData = viewModel.generateExportData(format)
+                        withContext(Dispatchers.IO) {
+                            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                                outputStream.write(exportData.toByteArray())
+                            }
+                        }
+                        Toast.makeText(context, "Exported successfully!", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(context, "Export failed.", Toast.LENGTH_SHORT).show()
+                    }
+                    pendingExportFormat = null
+                }
+            }
         }
     }
 
@@ -148,6 +180,27 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("DATA EXPORT", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
+
+            GlassButton(
+                text = "Export to CSV",
+                onClick = { 
+                    pendingExportFormat = "csv"
+                    exportLauncher.launch("intent_pay_export.csv") 
+                },
+                isPrimary = false
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            GlassButton(
+                text = "Export to JSON",
+                onClick = { 
+                    pendingExportFormat = "json"
+                    exportLauncher.launch("intent_pay_export.json") 
+                },
+                isPrimary = false
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 

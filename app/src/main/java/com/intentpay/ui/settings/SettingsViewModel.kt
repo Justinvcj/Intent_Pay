@@ -7,6 +7,7 @@ import com.intentpay.data.local.BudgetEntity
 import com.intentpay.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(private val repository: TransactionRepository) : ViewModel() {
@@ -40,6 +41,15 @@ class SettingsViewModel(private val repository: TransactionRepository) : ViewMod
         viewModelScope.launch {
             val current = _budget.value ?: return@launch
             repository.setBudgetConfig(current.copy(googleDriveFolderId = sheetId))
+        }
+    }
+
+    suspend fun generateExportData(format: String): String {
+        val txs = repository.allTransactions.first()
+        return if (format.lowercase() == "json") {
+            com.intentpay.utils.ExportManager.generateJson(txs)
+        } else {
+            com.intentpay.utils.ExportManager.generateCsv(txs)
         }
     }
 }

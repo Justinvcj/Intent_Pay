@@ -22,6 +22,7 @@ class IntentPayApplication : Application() {
     lateinit var transactionRepository: TransactionRepository
     lateinit var merchantMemory: MerchantMemory
     lateinit var transactionDetector: UnifiedTransactionDetector
+    lateinit var dataStoreManager: com.intentpay.data.local.DataStoreManager
 
     override fun onCreate() {
         super.onCreate()
@@ -29,6 +30,7 @@ class IntentPayApplication : Application() {
         transactionRepository = TransactionRepository(database.transactionDao(), database.budgetDao())
         merchantMemory = MerchantMemory(database.merchantRuleDao())
         transactionDetector = UnifiedTransactionDetector(transactionRepository, merchantMemory)
+        dataStoreManager = com.intentpay.data.local.DataStoreManager(this)
         
         // Initialize default budget if not exists
         CoroutineScope(Dispatchers.IO).launch {

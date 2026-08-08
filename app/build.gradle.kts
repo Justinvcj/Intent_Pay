@@ -106,4 +106,10 @@ dependencies {
         exclude(group = "org.apache.httpcomponents")
     }
     implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    
+    // Preferences DataStore
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // Gson
+    implementation("com.google.code.gson:gson:2.10.1")
 }

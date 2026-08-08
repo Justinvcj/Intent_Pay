@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -33,6 +34,8 @@ import com.intentpay.ui.theme.IntentPayTheme
 import com.intentpay.ui.pending.PendingReviewViewModelFactory
 import com.intentpay.ui.analytics.AnalyticsViewModelFactory
 import com.intentpay.ui.history.HistoryViewModelFactory
+import com.intentpay.ui.onboarding.OnboardingScreen
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,11 +61,21 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     var splashCompleted by remember { mutableStateOf(false) }
+                    val isOnboardingComplete by app.dataStoreManager.isOnboardingComplete.collectAsState(initial = null)
+                    val scope = rememberCoroutineScope()
                     
-                    if (!splashCompleted) {
+                    if (!splashCompleted || isOnboardingComplete == null) {
                         AnimatedSplashScreen(
                             onAnimationFinished = {
                                 splashCompleted = true
+                            }
+                        )
+                    } else if (isOnboardingComplete == false) {
+                        OnboardingScreen(
+                            onComplete = {
+                                scope.launch {
+                                    app.dataStoreManager.setOnboardingComplete(true)
+                                }
                             }
                         )
                     } else {

@@ -21,6 +21,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import com.intentpay.R
 import kotlinx.coroutines.delay
@@ -30,36 +32,40 @@ fun AnimatedSplashScreen(onAnimationFinished: () -> Unit) {
     var startAnimation by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1.0f else 0.8f,
-        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+        targetValue = if (startAnimation) 1.0f else 0.5f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        ),
         label = "splash_scale"
     )
     
     val alpha by animateFloatAsState(
         targetValue = if (startAnimation) 1.0f else 0.0f,
-        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
         label = "splash_alpha"
     )
 
     LaunchedEffect(Unit) {
         startAnimation = true
-        delay(700)
+        delay(1500)
         onAnimationFinished()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212)),
+            .background(Color(0xFF0D0D12)), // Deeper dark for more premium look
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.intentpay_logo),
+            painter = painterResource(id = R.drawable.intent_pay_logo),
             contentDescription = "IntentPay Logo",
             modifier = Modifier
                 .size(160.dp)
                 .scale(scale)
                 .alpha(alpha)
+                .clip(RoundedCornerShape(32.dp))
         )
     }
 }

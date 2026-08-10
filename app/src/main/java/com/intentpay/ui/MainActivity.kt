@@ -39,9 +39,6 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Implement Android 12 SplashScreen API support
-        installSplashScreen()
-        
         super.onCreate(savedInstanceState)
         
         val app = application as IntentPayApplication

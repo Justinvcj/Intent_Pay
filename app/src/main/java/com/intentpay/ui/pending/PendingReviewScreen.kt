@@ -82,7 +82,15 @@ fun PendingTransactionCard(
     transaction: TransactionEntity,
     onCategorySelected: (Category) -> Unit
 ) {
-    GlassCard(modifier = Modifier.fillMaxWidth().animateContentSize(), cornerRadius = 20.dp) {
+    GlassCard(
+        modifier = Modifier.fillMaxWidth().animateContentSize(
+            animationSpec = androidx.compose.animation.core.spring(
+                dampingRatio = 1f,
+                stiffness = 400f
+            )
+        ), 
+        cornerRadius = 20.dp
+    ) {
         Column(modifier = Modifier.padding(20.dp)) {
             val amountColor = if (transaction.isIncome) IosGreen else Color.White
             val sign = if (transaction.isIncome) "+" else "-"

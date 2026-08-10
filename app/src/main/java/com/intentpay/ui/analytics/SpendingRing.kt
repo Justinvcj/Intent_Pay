@@ -36,7 +36,10 @@ fun SpendingRing(
         animatedSweep.snapTo(0f)
         animatedSweep.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+            animationSpec = androidx.compose.animation.core.spring(
+                dampingRatio = 0.8f, // Add a little bounce for momentum
+                stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+            )
         )
     }
 

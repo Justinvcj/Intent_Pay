@@ -168,7 +168,43 @@ fun MainScreen(
             NavHost(
                 navController = navController, 
                 startDestination = "dashboard",
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding),
+                enterTransition = {
+                    androidx.compose.animation.slideInHorizontally(
+                        initialOffsetX = { 1000 },
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = 1f,
+                            stiffness = 400f
+                        )
+                    )
+                },
+                exitTransition = {
+                    androidx.compose.animation.slideOutHorizontally(
+                        targetOffsetX = { -1000 },
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = 1f,
+                            stiffness = 400f
+                        )
+                    )
+                },
+                popEnterTransition = {
+                    androidx.compose.animation.slideInHorizontally(
+                        initialOffsetX = { -1000 },
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = 1f,
+                            stiffness = 400f
+                        )
+                    )
+                },
+                popExitTransition = {
+                    androidx.compose.animation.slideOutHorizontally(
+                        targetOffsetX = { 1000 },
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = 1f,
+                            stiffness = 400f
+                        )
+                    )
+                }
             ) {
                 composable("dashboard") {
                     val viewModel: DashboardViewModel = viewModel(factory = dashboardFactory)

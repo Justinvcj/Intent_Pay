@@ -36,7 +36,14 @@ fun GlassButton(
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (isPressed) 0.96f else 1f, label = "button_scale")
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f, 
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = 1f, // No bounce
+            stiffness = 400f // Snappy response
+        ),
+        label = "button_scale"
+    )
 
     Button(
         onClick = onClick,

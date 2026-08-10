@@ -116,7 +116,12 @@ fun DashboardScreen(
             item {
                 // Main Balance / Budget Card
                 GlassCard(
-                    modifier = Modifier.fillMaxWidth().animateContentSize(),
+                    modifier = Modifier.fillMaxWidth().animateContentSize(
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = 1f,
+                            stiffness = 400f
+                        )
+                    ),
                     cornerRadius = 24.dp
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
@@ -188,7 +193,12 @@ fun DashboardScreen(
             } else {
                 item {
                     GlassCard(
-                        modifier = Modifier.fillMaxWidth().animateContentSize(),
+                        modifier = Modifier.fillMaxWidth().animateContentSize(
+                            animationSpec = androidx.compose.animation.core.spring(
+                                dampingRatio = 1f,
+                                stiffness = 400f
+                            )
+                        ),
                         cornerRadius = 20.dp
                     ) {
                         Column {

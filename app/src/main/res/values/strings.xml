@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IntentPay</string>
+    <string name="accessibility_service_description">IntentPay needs Accessibility permission to detect UPI transactions and instantly prompt you for the transaction intent (e.g. Groceries) when you complete a payment.</string>
+</resources>

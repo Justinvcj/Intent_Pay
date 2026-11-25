@@ -80,7 +80,12 @@
             android:name=".ui.intercept.UpiInterceptActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="false" />
-        
+
+        <activity
+            android:name=".ui.reflection.ReflectionActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
     </application>
 
 </manifest>

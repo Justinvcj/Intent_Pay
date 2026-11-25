@@ -101,6 +101,17 @@ Intent Pay requires the following explicit permissions for offline transaction d
 
 4. Install on a connected physical Android device or emulator with SMS capabilities.
 
+### Release signing
+
+Release builds read signing credentials from environment variables (nothing is stored in the repo):
+
+- `KEYSTORE_PATH`: path to the release keystore file
+- `KEYSTORE_PWD`: keystore password
+- `KEY_ALIAS`: key alias inside the keystore
+- `KEY_PWD`: key password
+
+If `KEYSTORE_PATH` is unset or the file does not exist, `assembleRelease` falls back to debug signing.
+
 ---
 
 ## Tech Stack

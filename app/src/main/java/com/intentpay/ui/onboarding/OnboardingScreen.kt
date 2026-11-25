@@ -21,12 +21,13 @@ import com.intentpay.ui.components.GlassButton
 import com.intentpay.ui.components.MeshBackground
 import com.intentpay.ui.theme.IosBlue
 import com.intentpay.ui.theme.TextSecondary
+import com.intentpay.utils.DetectionPermissionRows
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
 
     MeshBackground(modifier = Modifier.fillMaxSize()) {
@@ -40,7 +41,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                     .weight(1f)
                     .fillMaxWidth()
             ) { page ->
-                OnboardingPage(page)
+                if (page == 3) PermissionsPage() else OnboardingPage(page)
             }
 
             // Pager Indicator
@@ -71,7 +72,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 32.dp)
             ) {
-                if (pagerState.currentPage < 2) {
+                if (pagerState.currentPage < 3) {
                     GlassButton(
                         text = "Next",
                         onClick = {
@@ -84,7 +85,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                     )
                 } else {
                     GlassButton(
-                        text = "Get Started",
+                        text = "Finish",
                         onClick = onComplete,
                         isPrimary = true,
                         modifier = Modifier.fillMaxWidth()
@@ -92,6 +93,35 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PermissionsPage() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Enable Detection",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        Text(
+            text = "Grant these so Intent Pay can spot payments automatically. All optional — manual entry always works.",
+            fontSize = 15.sp,
+            color = TextSecondary,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        DetectionPermissionRows()
     }
 }
 

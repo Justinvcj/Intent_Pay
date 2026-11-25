@@ -1,5 +1,6 @@
 package com.intentpay.data.detection
 
+import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -46,8 +47,18 @@ class PaymentNotificationListener : NotificationListenerService() {
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    app.transactionDetector.process(parsedTransaction)
+                    val result = app.transactionDetector.process(parsedTransaction)
                     Log.d("PaymentNotification", "Processed notification transaction: $parsedTransaction")
+
+                    if (result.shouldReflect) {
+                        val reflectionIntent = Intent().apply {
+                            setClassName(applicationContext, "com.intentpay.ui.reflection.ReflectionActivity")
+                            putExtra("TRANSACTION_ID", result.id)
+                            putExtra("AMOUNT", result.amount)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        }
+                        applicationContext.startActivity(reflectionIntent)
+                    }
                 } catch (e: Exception) {
                     Log.e("PaymentNotification", "Failed to process notification", e)
                 }

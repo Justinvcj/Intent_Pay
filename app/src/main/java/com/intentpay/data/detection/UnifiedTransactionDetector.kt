@@ -13,11 +13,18 @@ data class ParsedTransaction(
     val upiRef: String? = null
 )
 
+/**
+ * Result of processing a detected transaction.
+ * [shouldReflect] is true when the transaction is an expense above the user's
+ * reflection threshold, so callers should show ReflectionActivity.
+ */
+data class ProcessResult(val id: Long, val shouldReflect: Boolean, val amount: Double)
+
 class UnifiedTransactionDetector(
     private val transactionRepo: TransactionRepository,
     private val merchantMemory: MerchantMemory
 ) {
-    suspend fun process(parsed: ParsedTransaction): Long {
+    suspend fun process(parsed: ParsedTransaction): ProcessResult {
         // 2. Auto-categorize via Merchant Memory
         val category = merchantMemory.resolve(parsed.merchant)
         val normalized = parsed.merchant?.trim()?.lowercase()?.replace(Regex("[^a-z0-9]"), "")
@@ -41,6 +48,10 @@ class UnifiedTransactionDetector(
         // 4. Insert (deduplicateAndInsert checks for existing matching amount in 2min window)
         val id = transactionRepo.deduplicateAndInsert(entity)
 
-        return id
+        // 5. Reflection threshold (shared by all detection channels)
+        val threshold = transactionRepo.getBudgetSync()?.reflectionThreshold ?: 200.0
+        val shouldReflect = !parsed.isIncome && parsed.amount > threshold
+
+        return ProcessResult(id = id, shouldReflect = shouldReflect, amount = parsed.amount)
     }
 }

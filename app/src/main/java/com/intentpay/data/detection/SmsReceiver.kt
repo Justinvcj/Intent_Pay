@@ -19,7 +19,6 @@ class SmsReceiver : BroadcastReceiver() {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
         val app = context.applicationContext as IntentPayApplication
-        val repository = app.transactionRepository
 
         val pendingResult = goAsync()
         
@@ -30,8 +29,6 @@ class SmsReceiver : BroadcastReceiver() {
                     val body = msg.displayMessageBody
                     val parsedSms = SmsParser.parseUpiMessage(body ?: "")
                     if (parsedSms != null) {
-                        val thresholdAmount = repository.getBudgetSync()?.reflectionThreshold ?: 200.0
-                        
                         val parsedTx = ParsedTransaction(
                             amount = parsedSms.amount,
                             merchant = parsedSms.merchant,
@@ -40,14 +37,14 @@ class SmsReceiver : BroadcastReceiver() {
                             upiRef = parsedSms.upiRef
                         )
                         
-                        val insertedId = app.transactionDetector.process(parsedTx)
-                        
-                        // If it exceeds threshold and is not income, push ReflectionActivity
-                        if (parsedTx.amount > thresholdAmount && !parsedTx.isIncome) {
+                        val result = app.transactionDetector.process(parsedTx)
+
+                        // Threshold decision lives in UnifiedTransactionDetector
+                        if (result.shouldReflect) {
                             val reflectionIntent = Intent().apply {
                                 setClassName(context, "com.intentpay.ui.reflection.ReflectionActivity")
-                                putExtra("TRANSACTION_ID", insertedId)
-                                putExtra("AMOUNT", parsedTx.amount)
+                                putExtra("TRANSACTION_ID", result.id)
+                                putExtra("AMOUNT", result.amount)
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             }
                             context.startActivity(reflectionIntent)

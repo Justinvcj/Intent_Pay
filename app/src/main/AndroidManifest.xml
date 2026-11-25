@@ -30,6 +30,9 @@
     <application
         android:name=".IntentPayApplication"
         android:allowBackup="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@drawable/intent_pay_logo"
         android:label="IntentPay"
         android:supportsRtl="true"

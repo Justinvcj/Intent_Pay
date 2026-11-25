@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.util.Log
+import com.intentpay.BuildConfig
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.intentpay.ui.intercept.UpiInterceptActivity
@@ -14,9 +15,7 @@ class UpiAccessibilityService : AccessibilityService() {
         "com.google.android.apps.nbu.paisa.user", // GPay
         "com.phonepe.app", // PhonePe
         "net.one97.paytm", // Paytm
-        "in.org.npci.upiapp", // BHIM
-        "com.navi.app", // Navi
-        "com.dreamplug.androidapp" // Cred
+        "in.org.npci.upiapp" // BHIM
     )
 
     private var lastAmount: String? = null
@@ -32,7 +31,7 @@ class UpiAccessibilityService : AccessibilityService() {
         // We only need to monitor text to scrape amount and payee
         info.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS
         this.serviceInfo = info
-        Log.d("UpiIntercept", "Accessibility Service Connected")
+        if (BuildConfig.DEBUG) Log.d("UpiIntercept", "Accessibility Service Connected")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -85,7 +84,7 @@ class UpiAccessibilityService : AccessibilityService() {
     }
 
     private fun launchInterceptActivity(amount: String, payee: String) {
-        Log.d("UpiIntercept", "Launching intercept for ₹$amount to $payee")
+        if (BuildConfig.DEBUG) Log.d("UpiIntercept", "Launching intercept for ₹$amount to $payee")
         val intent = Intent(this, UpiInterceptActivity::class.java)
         intent.putExtra("AMOUNT", amount)
         intent.putExtra("PAYEE", payee)
@@ -94,6 +93,6 @@ class UpiAccessibilityService : AccessibilityService() {
     }
 
     override fun onInterrupt() {
-        Log.d("UpiIntercept", "Accessibility Service Interrupted")
+        if (BuildConfig.DEBUG) Log.d("UpiIntercept", "Accessibility Service Interrupted")
     }
 }

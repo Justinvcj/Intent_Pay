@@ -1,6 +1,7 @@
 package com.intentpay.data.detection
 
 import android.util.Log
+import com.intentpay.BuildConfig
 
 object NotificationParser {
     data class ParsedNotification(
@@ -14,7 +15,7 @@ object NotificationParser {
 
     fun parse(title: String, text: String, packageName: String): ParsedNotification? {
         val combinedText = "$title $text".lowercase()
-        Log.d(TAG, "Parsing notification from $packageName: $combinedText")
+        if (BuildConfig.DEBUG) Log.d(TAG, "Parsing notification from $packageName: $combinedText")
 
         val sourceApp = when (packageName) {
             "com.google.android.apps.nbu.paisa.user" -> "GPay"
@@ -28,7 +29,7 @@ object NotificationParser {
         val isCredit = combinedText.contains("received") || combinedText.contains("credited")
 
         if (!isDebit && !isCredit) {
-            Log.d(TAG, "Notification is neither debit nor credit.")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Notification is neither debit nor credit.")
             return null
         }
 

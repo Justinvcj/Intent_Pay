@@ -44,6 +44,9 @@ android {
     lint {
         abortOnError = false
         checkReleaseBuilds = false
+        // Known crash: this detector throws IllegalArgumentException on current
+        // Kotlin metadata — https://issuetracker.google.com/issues?q=ComposableCoroutineCreationDetector
+        disable += "CoroutineCreationDuringComposition"
     }
     packaging {
         resources {

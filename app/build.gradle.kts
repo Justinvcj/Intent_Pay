@@ -115,5 +115,5 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.15.0")
 }

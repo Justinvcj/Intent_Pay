@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Room DB (intentpay_database) holds transactions + merchant data -->
+    <exclude domain="database" />
+    <!-- Jetpack DataStore "settings" -->
+    <exclude domain="file" path="datastore/" />
+    <!-- Defensive: any shared prefs that may hold credentials -->
+    <exclude domain="sharedpref" path="secrets.xml" />
+    <exclude domain="sharedpref" path="google_drive_credentials.xml" />
+</full-backup-content>

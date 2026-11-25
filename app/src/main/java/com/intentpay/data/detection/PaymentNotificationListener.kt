@@ -4,6 +4,7 @@ import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.intentpay.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ class PaymentNotificationListener : NotificationListenerService() {
         val title = notification.extras.getCharSequence("android.title")?.toString() ?: ""
         val text = notification.extras.getCharSequence("android.text")?.toString() ?: ""
 
-        Log.d("PaymentNotification", "Received from $packageName: $title - $text")
+        if (BuildConfig.DEBUG) Log.d("PaymentNotification", "Received from $packageName: $title - $text")
 
         val parsed = NotificationParser.parse(title, text, packageName)
         
@@ -48,7 +49,7 @@ class PaymentNotificationListener : NotificationListenerService() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val result = app.transactionDetector.process(parsedTransaction)
-                    Log.d("PaymentNotification", "Processed notification transaction: $parsedTransaction")
+                    if (BuildConfig.DEBUG) Log.d("PaymentNotification", "Processed notification transaction: $parsedTransaction")
 
                     if (result.shouldReflect) {
                         val reflectionIntent = Intent().apply {
@@ -60,7 +61,7 @@ class PaymentNotificationListener : NotificationListenerService() {
                         applicationContext.startActivity(reflectionIntent)
                     }
                 } catch (e: Exception) {
-                    Log.e("PaymentNotification", "Failed to process notification", e)
+                    if (BuildConfig.DEBUG) Log.e("PaymentNotification", "Failed to process notification", e)
                 }
             }
         }

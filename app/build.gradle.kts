@@ -22,9 +22,31 @@ android {
         }
     }
 
+    // Release signing is env-driven so no keystore or password lives in the repo.
+    // If KEYSTORE_PATH is unset or the file is missing, release falls back to debug signing.
+    val releaseKeystore: File? = System.getenv("KEYSTORE_PATH")
+        ?.takeIf { it.isNotBlank() }
+        ?.let { file(it) }
+        ?.takeIf { it.exists() }
+
+    signingConfigs {
+        create("release") {
+            if (releaseKeystore != null) {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("KEYSTORE_PWD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PWD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
+            signingConfig = if (releaseKeystore != null)
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

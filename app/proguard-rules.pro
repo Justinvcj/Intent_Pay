@@ -30,3 +30,9 @@
 # ---- JDK-only APIs referenced by Apache HttpClient (pulled in via Google API Client); absent on Android ----
 -dontwarn javax.naming.**
 -dontwarn org.ietf.jgss.**
+
+# Strip verbose/debug logging from release builds
+-assumenosideeffects class android.util.Log {
+    public static int d(...);
+    public static int v(...);
+}

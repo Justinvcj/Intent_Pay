@@ -31,6 +31,7 @@ import com.intentpay.ui.components.GlassTextField
 import com.intentpay.ui.theme.IosBlue
 import com.intentpay.ui.theme.IosRed
 import com.intentpay.ui.theme.TextSecondary
+import com.intentpay.utils.DetectionPermissionRows
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,6 +164,10 @@ fun SettingsScreen(
                 }
             }
             
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("DETECTION PERMISSIONS", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
+            DetectionPermissionRows()
+
             Spacer(modifier = Modifier.height(32.dp))
             Text("GOOGLE DRIVE SYNC", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
             

@@ -35,26 +35,34 @@ class MerchantMemory(
         val keywordMatch = KeywordRules.match(normalized)
         if (keywordMatch != null) {
             // Auto-save this as a rule
-            learn(normalized, keywordMatch, createdByUser = false)
+            learn(rawMerchant, keywordMatch, createdByUser = false)
             return keywordMatch
         }
 
         return Category.UNCATEGORIZED
     }
 
-    suspend fun learn(normalizedMerchant: String, category: Category, createdByUser: Boolean) {
+    suspend fun learn(rawMerchant: String?, category: Category, createdByUser: Boolean) {
+        if (rawMerchant.isNullOrBlank()) return
+        val normalized = normalize(rawMerchant)
+        if (normalized.isEmpty()) return
+
         val rule = MerchantRuleEntity(
-            merchantPattern = normalizedMerchant,
+            merchantPattern = normalized,
             categoryName = category.name,
             timesUsed = 1,
             lastUsedMillis = System.currentTimeMillis(),
             createdByUser = createdByUser
         )
         merchantRuleDao.insertOrUpdate(rule)
-        cache[normalizedMerchant] = category
+        cache[normalized] = category
     }
 
-    private fun normalize(merchant: String): String {
-        return merchant.trim().lowercase().replace(Regex("[^a-z0-9]"), "")
-    }
+    private fun normalize(merchant: String): String = normalizeMerchantKey(merchant)
 }
+
+private val NON_ALNUM = Regex("[^a-z0-9]")
+
+/** Canonical merchant key used for both lookups and storage (also used by the DB migration). */
+fun normalizeMerchantKey(merchant: String): String =
+    merchant.trim().lowercase().replace(NON_ALNUM, "")

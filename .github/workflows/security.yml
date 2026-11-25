@@ -19,6 +19,10 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Soft-fail if the repo doesn't have Dependency Graph / GHAS enabled.
+    # Private repos without GHAS get "Dependency review is not supported";
+    # once Dependency Graph lands, the check reports real diffs again.
+    continue-on-error: true
 
     steps:
       - name: Checkout
@@ -28,6 +32,7 @@ jobs:
 
       - name: Dependency review
         uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9 # v4.7.1
+        continue-on-error: true
 
   gradle-dependency-report:
     name: Gradle dependency report

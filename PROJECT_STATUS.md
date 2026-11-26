@@ -86,7 +86,7 @@ Grouped by severity. Line refs are from the current HEAD.
 10. **`SyncWorker` has no `NetworkType.CONNECTED` constraint.** Fired one-off after every reflection save. Will retry-storm on airplane mode.
 11. **Google Sheets flow is semantically confused.** `BudgetEntity.googleDriveFolderId` is actually used as a **spreadsheet ID** (`GoogleSheetsService.appendTransactions`). The field name, UI label ("Google Drive Folder ID"), and runtime usage disagree. `SyncWorker` early-returns `success()` when unconfigured — fine — but there's no validation that the sheet or the `"<year> Daily Exp"` tab exists; append on a missing tab throws.
 12. **`ReminderWorker` ignores configured reminder time.** `BudgetEntity.endOfDayReminderHour/Minute` exist, but `ReminderWorker` just enqueues a 24 h periodic worker with no initial delay. Reminder fires at install-time + N·24h, not 9 PM local. The "3-day" and "weekly report" flags (`enableThreeDayReminder`, `enableWeeklyReport`, `weeklyReportDay`) are declared but **never read anywhere**.
-13. **`ExportTransactionsUseCase` is dead code and broken.** Uses `Environment.getExternalStoragePublicDirectory` which is a no-op on `targetSdk≥30` for non-media files, and `WRITE_EXTERNAL_STORAGE` is maxSdk=28. Settings already uses SAF via `CreateDocument` — delete this class.
+13. ~~**`ExportTransactionsUseCase` is dead code and broken.** Uses `Environment.getExternalStoragePublicDirectory` which is a no-op on `targetSdk≥30` for non-media files, and `WRITE_EXTERNAL_STORAGE` is maxSdk=28. Settings already uses SAF via `CreateDocument` — delete this class.~~ **Fixed:** class deleted in PR #27.
 14. **Accessibility service launches `UpiInterceptActivity` even on payment cancel.** No distinction between "user backed out" and "payment completed". Will log phantom transactions whenever the user opens GPay to check balance.
 15. **No tests.** `app/src/test` and `app/src/androidTest` directories don't exist despite JUnit, Espresso, and Compose UI-Test being declared in `dependencies`. Zero coverage of regex parsing, categorization, dedup — the exact pieces most likely to misfire on real SMS corpora.
 
@@ -149,7 +149,7 @@ The architecture doc promises, code does not deliver:
 6. Move the `> threshold` reflection trigger out of `SmsReceiver` into `UnifiedTransactionDetector` so notification + accessibility paths also trigger it.
 7. Tighten dedup key: `(amount, source, upiRef ?: merchant, ±120 s)`.
 8. In `UpiAccessibilityService`, only launch intercept when the outgoing window was a "Payment success"-labeled screen; reset `lastAmount` on back-navigation.
-9. Delete `ExportTransactionsUseCase` (dead code).
+9. ~~Delete `ExportTransactionsUseCase` (dead code).~~ Done in PR #27.
 10. Fire `SyncWorker` with `Constraints.Builder().setRequiredNetworkType(CONNECTED).build()`.
 11. Rename `googleDriveFolderId` → `googleSpreadsheetId` end-to-end; add a one-time migration or just a column rename via Room schema bump.
 

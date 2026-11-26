@@ -1,5 +1,6 @@
 package com.intentpay.data.detection
 
+import android.os.Bundle
 import android.util.Log
 import com.intentpay.BuildConfig
 
@@ -12,6 +13,19 @@ object NotificationParser {
     )
 
     private const val TAG = "NotificationParser"
+
+    /** Reads the expanded-style extras too, used only when title + text carry no amount. */
+    fun parse(title: String, text: String, packageName: String, extras: Bundle?): ParsedNotification? {
+        val primary = parse(title, text, packageName)
+        if (primary != null || extras == null) return primary
+        val extra = listOfNotNull(
+            extras.getCharSequence("android.bigText")?.toString(),
+            extras.getCharSequence("android.summaryText")?.toString(),
+            extras.getCharSequenceArray("android.textLines")?.joinToString(" ") { it.toString() }
+        ).joinToString(" ")
+        if (extra.isBlank()) return null
+        return parse(title, "$text $extra", packageName)
+    }
 
     fun parse(title: String, text: String, packageName: String): ParsedNotification? {
         val combinedText = "$title $text".lowercase()

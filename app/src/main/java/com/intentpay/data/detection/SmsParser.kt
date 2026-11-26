@@ -26,7 +26,8 @@ object SmsParser {
 
         // Extrapolate merchant
         var merchant: String? = null
-        val toMatch = Regex("(?i)(?:to)\\s+([a-zA-Z0-9@.-]+)").find(messageBody)
+        // Case-insensitive on the original body; lazy capture stops at a following keyword, sentence punctuation or end of line.
+        val toMatch = Regex("(?im)\\bto\\s+([A-Za-z0-9@.&'\\- ]{1,64}?)(?=\\s+(?:on|at|for|via|through|using|ref)\\b|[.,;](?:\\s|$)|\\s*$)").find(messageBody)
         if (toMatch != null) {
             merchant = toMatch.groupValues[1]
         } else {
@@ -35,7 +36,8 @@ object SmsParser {
                 merchant = paidMatch.groupValues[1]
             }
         }
+        merchant = merchant?.trim()?.trimEnd('.', ',', '-', ';', ' ')?.takeIf { it.isNotEmpty() }
 
-        return ParsedSms(amount, merchant?.trim(), upiRef, isIncome)
+        return ParsedSms(amount, merchant, upiRef, isIncome)
     }
 }

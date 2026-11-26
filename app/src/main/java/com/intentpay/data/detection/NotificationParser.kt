@@ -25,13 +25,18 @@ object NotificationParser {
             else -> "Unknown UPI"
         }
 
+        val parsed = parseBody(combinedText, sourceApp)
+        if (parsed == null && BuildConfig.DEBUG) Log.d(TAG, "Notification is not a parseable debit/credit.")
+        return parsed
+    }
+
+    /** Pure parsing of an already-combined notification body; no Android dependencies. */
+    internal fun parseBody(body: String, sourceApp: String = "Unknown UPI"): ParsedNotification? {
+        val combinedText = body.lowercase()
         val isDebit = combinedText.contains("paid") || combinedText.contains("sent") || combinedText.contains("debited")
         val isCredit = combinedText.contains("received") || combinedText.contains("credited")
 
-        if (!isDebit && !isCredit) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Notification is neither debit nor credit.")
-            return null
-        }
+        if (!isDebit && !isCredit) return null
 
         val isIncome = isCredit && !isDebit
 

@@ -105,3 +105,25 @@ class TransactionRepository(
         return merchA == merchB
     }
 }
+
+internal const val DEDUP_WINDOW_MILLIS = 120_000L
+
+/**
+ * Pure duplicate check between two transactions. Same non-blank UPI ref is always a duplicate;
+ * otherwise amount must match, timestamps must be within [windowMillis], and if both have a
+ * merchant their normalized forms must match (a missing merchant falls back to a match).
+ * Note: deduplicateAndInsert still pre-filters via the DAO (amount + window); not yet wired to this.
+ */
+internal fun isDuplicate(
+    a: TransactionEntity,
+    b: TransactionEntity,
+    windowMillis: Long = DEDUP_WINDOW_MILLIS
+): Boolean {
+    if (!a.upiRefId.isNullOrBlank() && a.upiRefId == b.upiRefId) return true
+    if (a.amount != b.amount) return false
+    if (kotlin.math.abs(a.dateMillis - b.dateMillis) > windowMillis) return false
+    val ma = a.merchant?.let { com.intentpay.categorization.normalizeMerchantKey(it) }.orEmpty()
+    val mb = b.merchant?.let { com.intentpay.categorization.normalizeMerchantKey(it) }.orEmpty()
+    if (ma.isNotEmpty() && mb.isNotEmpty() && ma != mb) return false
+    return true
+}

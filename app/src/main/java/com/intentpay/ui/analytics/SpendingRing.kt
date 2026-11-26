@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +23,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.intentpay.ui.theme.TextSecondary
 
 @Composable
 fun SpendingRing(
@@ -31,6 +31,9 @@ fun SpendingRing(
     modifier: Modifier = Modifier
 ) {
     val animatedSweep = remember { Animatable(0f) }
+    val emptyTrackColor = MaterialTheme.colorScheme.outlineVariant
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val valueColor = MaterialTheme.colorScheme.onSurface
 
     LaunchedEffect(spends) {
         animatedSweep.snapTo(0f)
@@ -57,7 +60,7 @@ fun SpendingRing(
 
             if (spends.isEmpty()) {
                 drawArc(
-                    color = Color(0x33FFFFFF), // Empty state
+                    color = emptyTrackColor,
                     startAngle = 0f,
                     sweepAngle = 360f,
                     useCenter = false,
@@ -91,8 +94,8 @@ fun SpendingRing(
         androidx.compose.foundation.layout.Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Total Spent", color = TextSecondary, fontSize = 14.sp)
-            Text("₹$totalSpent", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text("Total Spent", color = labelColor, fontSize = 14.sp)
+            Text("₹$totalSpent", color = valueColor, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

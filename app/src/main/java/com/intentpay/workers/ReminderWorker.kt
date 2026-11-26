@@ -11,8 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.intentpay.R
-import com.intentpay.data.local.IntentPayDatabase
-import com.intentpay.data.repository.TransactionRepository
+import com.intentpay.IntentPayApplication
 import com.intentpay.ui.MainActivity
 import kotlinx.coroutines.flow.first
 
@@ -22,9 +21,8 @@ class ReminderWorker(
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        val database = IntentPayDatabase.getDatabase(context)
-        val repository = TransactionRepository(database.transactionDao(), database.budgetDao())
-        
+        val repository = (applicationContext as IntentPayApplication).transactionRepository
+
         val count = repository.getUncategorizedCount().first()
 
         if (count > 0) {

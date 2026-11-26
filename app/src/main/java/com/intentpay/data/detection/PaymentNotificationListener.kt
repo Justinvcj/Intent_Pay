@@ -32,7 +32,7 @@ class PaymentNotificationListener : NotificationListenerService() {
 
         if (BuildConfig.DEBUG) Log.d("PaymentNotification", "Received from $packageName: $title - $text")
 
-        val parsed = NotificationParser.parse(title, text, packageName)
+        val parsed = NotificationParser.parse(title, text, packageName, notification.extras)
         
         if (parsed != null) {
             val app = applicationContext as IntentPayApplication

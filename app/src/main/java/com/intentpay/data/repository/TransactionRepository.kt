@@ -1,5 +1,6 @@
 package com.intentpay.data.repository
 
+import com.intentpay.categorization.normalizeMerchantKey
 import com.intentpay.data.local.BudgetDao
 import com.intentpay.data.local.BudgetEntity
 import com.intentpay.data.local.TransactionDao
@@ -82,16 +83,26 @@ class TransactionRepository(
     }
     
     suspend fun deduplicateAndInsert(transaction: TransactionEntity): Long {
-        // Find existing transaction with same amount within 2 minutes window
+        // DAO returns one auto-detected row with the same amount in the +/-120s window; tighten it here.
         val existing = transactionDao.findSimilarAutoDetected(
             amount = transaction.amount,
             startWindow = transaction.dateMillis - 120_000,
             endWindow = transaction.dateMillis + 120_000
         )
-        if (existing == null) {
+        if (existing == null || !isSameTransaction(existing, transaction)) {
             return transactionDao.insertTransaction(transaction)
         }
         return existing.id
+    }
+
+    private fun isSameTransaction(a: TransactionEntity, b: TransactionEntity): Boolean {
+        val refA = a.upiRefId?.takeIf { it.isNotBlank() }
+        val refB = b.upiRefId?.takeIf { it.isNotBlank() }
+        if (refA != null && refB != null) return refA == refB
+        val merchA = a.merchant?.let(::normalizeMerchantKey)?.takeIf { it.isNotEmpty() }
+        val merchB = b.merchant?.let(::normalizeMerchantKey)?.takeIf { it.isNotEmpty() }
+        if (merchA == null || merchB == null) return true // no merchant on a side: amount + window only
+        return merchA == merchB
     }
 }
 

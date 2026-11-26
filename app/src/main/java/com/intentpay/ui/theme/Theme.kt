@@ -3,10 +3,12 @@ package com.intentpay.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -15,38 +17,84 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Enforcing Dark Mode Palette primarily for aesthetic modern fintech vibe
-private val DarkColorPalette = darkColorScheme(
-    primary = IosBlue,
-    secondary = IosGray,
-    tertiary = IosGreen,
-    background = BackgroundBlack,
-    surface = SurfaceDarkGray,
-    surfaceVariant = SurfaceElevated,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = TextWhite,
-    onSurface = TextWhite,
-    onSurfaceVariant = TextSecondary,
-    error = IosRed,
-    outline = DividerColor,
-    outlineVariant = DividerColor
+private val LightColorPalette: ColorScheme = lightColorScheme(
+    primary = AccentLight,
+    onPrimary = OnAccentLight,
+    primaryContainer = AccentContainerLight,
+    onPrimaryContainer = OnAccentContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryLight,
+    background = BackgroundLight,
+    onBackground = OnBackgroundLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
+    outline = OutlineLight,
+    outlineVariant = OutlineVariantLight,
+    error = ErrorLight,
+    onError = OnErrorLight,
+    inverseSurface = InverseSurfaceLight,
+    inverseOnSurface = InverseOnSurfaceLight,
+    inversePrimary = InversePrimaryLight,
+    scrim = ScrimLight,
+    surfaceTint = SurfaceTintLight
+)
+
+private val DarkColorPalette: ColorScheme = darkColorScheme(
+    primary = AccentDark,
+    onPrimary = OnAccentDark,
+    primaryContainer = AccentContainerDark,
+    onPrimaryContainer = OnAccentContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    outline = OutlineDark,
+    outlineVariant = OutlineVariantDark,
+    error = ErrorDark,
+    onError = OnErrorDark,
+    inverseSurface = InverseSurfaceDark,
+    inverseOnSurface = InverseOnSurfaceDark,
+    inversePrimary = InversePrimaryDark,
+    scrim = ScrimDark,
+    surfaceTint = SurfaceTintDark
 )
 
 @Composable
 fun IntentPayTheme(
-    darkTheme: Boolean = true, // Force default to dark as requested
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Off by default: the brand palette should look the same on every device.
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorPalette
+    val context = LocalContext.current
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        darkTheme -> DarkColorPalette
+        else -> LightColorPalette
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            // Edge-to-edge: content draws behind transparent system bars.
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            window.statusBarColor = Color.Transparent.toArgb()
+            window.navigationBarColor = Color.Transparent.toArgb()
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = !darkTheme
+            controller.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

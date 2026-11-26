@@ -8,11 +8,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.intentpay.IntentPayApplication
 import com.intentpay.data.repository.SyncWorker
 import com.intentpay.ui.theme.IntentPayTheme
+import java.util.concurrent.TimeUnit
 
 class ReflectionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +39,13 @@ class ReflectionActivity : ComponentActivity() {
                         viewModel = viewModel,
                         amount = amount,
                         onFinish = { 
-                            val workRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                            val constraints = Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build()
+                            val workRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+                                .setConstraints(constraints)
+                                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
+                                .build()
                             WorkManager.getInstance(this@ReflectionActivity).enqueue(workRequest)
                             finish() 
                         }

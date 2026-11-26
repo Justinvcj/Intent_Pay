@@ -183,7 +183,6 @@ com.intentpay/
 │   └── usecases/
 │       ├── CategorizeTransactionUseCase.kt  ← NEW
 │       ├── GenerateReportUseCase.kt         ← NEW
-│       ├── ExportTransactionsUseCase.kt     (enhanced)
 │       ├── GetSpendingInsightsUseCase.kt    ← NEW
 │       └── ScheduleReminderUseCase.kt       ← NEW
 │

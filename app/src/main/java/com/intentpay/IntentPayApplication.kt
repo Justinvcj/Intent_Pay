@@ -36,26 +36,43 @@ class IntentPayApplication : Application() {
         transactionDetector = UnifiedTransactionDetector(transactionRepository, merchantMemory)
         dataStoreManager = com.intentpay.data.local.DataStoreManager(this)
         
-        // Initialize default budget if not exists
+        // Initialize default budget if not exists, then schedule the daily reminder
+        // at the configured wall-clock time.
         applicationScope.launch {
-            if (transactionRepository.getBudgetSync() == null) {
-                transactionRepository.setBudgetConfig(
-                    BudgetEntity(
-                        id = 1,
-                        monthlyBudget = 10000.0,
-                        dailyLimit = 500.0,
-                        reflectionThreshold = 200.0
-                    )
+            var budget = transactionRepository.getBudgetSync()
+            if (budget == null) {
+                budget = BudgetEntity(
+                    id = 1,
+                    monthlyBudget = 10000.0,
+                    dailyLimit = 500.0,
+                    reflectionThreshold = 200.0
                 )
+                transactionRepository.setBudgetConfig(budget)
             }
+            scheduleReminder(budget.endOfDayReminderHour, budget.endOfDayReminderMinute)
         }
-        
-        // Setup Reminders
-        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS).build()
+    }
+
+    private fun scheduleReminder(hour: Int, minute: Int) {
+        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS)
+            .setInitialDelay(millisUntil(hour, minute), TimeUnit.MILLISECONDS)
+            .build()
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "daily_reminders",
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )
+    }
+
+    private fun millisUntil(hour: Int, minute: Int): Long {
+        val now = java.util.Calendar.getInstance()
+        val target = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, hour)
+            set(java.util.Calendar.MINUTE, minute)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+            if (timeInMillis <= now.timeInMillis) add(java.util.Calendar.DAY_OF_MONTH, 1)
+        }
+        return target.timeInMillis - now.timeInMillis
     }
 }

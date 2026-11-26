@@ -6,6 +6,7 @@ import com.intentpay.data.local.IntentPayDatabase
 import com.intentpay.data.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 import com.intentpay.categorization.MerchantMemory
@@ -24,6 +25,9 @@ class IntentPayApplication : Application() {
     lateinit var transactionDetector: UnifiedTransactionDetector
     lateinit var dataStoreManager: com.intentpay.data.local.DataStoreManager
 
+    /** Application-lifetime scope for fire-and-forget startup work. */
+    val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onCreate() {
         super.onCreate()
         database = IntentPayDatabase.getDatabase(this)
@@ -33,7 +37,7 @@ class IntentPayApplication : Application() {
         dataStoreManager = com.intentpay.data.local.DataStoreManager(this)
         
         // Initialize default budget if not exists
-        CoroutineScope(Dispatchers.IO).launch {
+        applicationScope.launch {
             if (transactionRepository.getBudgetSync() == null) {
                 transactionRepository.setBudgetConfig(
                     BudgetEntity(

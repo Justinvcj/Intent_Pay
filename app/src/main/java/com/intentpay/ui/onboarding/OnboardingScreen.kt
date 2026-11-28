@@ -2,175 +2,223 @@ package com.intentpay.ui.onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Payments
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.intentpay.ui.components.GlassButton
-import com.intentpay.ui.components.MeshBackground
-import com.intentpay.ui.theme.IosBlue
-import com.intentpay.ui.theme.TextSecondary
+import com.intentpay.ui.components.DetectedDot
+import com.intentpay.ui.components.GroupedCard
+import com.intentpay.ui.components.PrimaryButton
 import com.intentpay.utils.DetectionPermissionRows
 import kotlinx.coroutines.launch
+
+private const val PageCount = 4
+private const val PermissionsPageIndex = 3
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
-    val pagerState = rememberPagerState(pageCount = { 4 })
+    val pagerState = rememberPagerState(pageCount = { PageCount })
     val scope = rememberCoroutineScope()
+    val onLastPage = pagerState.currentPage == PermissionsPageIndex
 
-    MeshBackground(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 24.dp)
+    ) {
+        // Skip is always reachable until the final page: people can leave setup at any time.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) { page ->
-                if (page == 3) PermissionsPage() else OnboardingPage(page)
-            }
-
-            // Pager Indicator
-            Row(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(pagerState.pageCount) { iteration ->
-                    val color = if (pagerState.currentPage == iteration) IosBlue else Color(0x33FFFFFF)
-                    val width = if (pagerState.currentPage == iteration) 24.dp else 8.dp
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .height(8.dp)
-                            .width(width)
-                    )
+            if (!onLastPage) {
+                TextButton(onClick = onComplete) {
+                    Text("Skip", style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
 
-            // Action Buttons
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 32.dp)
-            ) {
-                if (pagerState.currentPage < 3) {
-                    GlassButton(
-                        text = "Next",
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                            }
-                        },
-                        isPrimary = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    GlassButton(
-                        text = "Finish",
-                        onClick = onComplete,
-                        isPrimary = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) { page ->
+            if (page == PermissionsPageIndex) PermissionsPage() else IntroPage(page)
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(PageCount) { index ->
+                val active = pagerState.currentPage == index
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (active) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.outlineVariant
+                        )
+                        .size(width = if (active) 20.dp else 8.dp, height = 8.dp)
+                )
             }
+        }
+
+        PrimaryButton(
+            text = if (onLastPage) "Done" else "Continue",
+            onClick = {
+                if (onLastPage) onComplete()
+                else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+            }
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun IntroPage(page: Int) {
+    val icon: ImageVector
+    val title: String
+    val body: String
+    when (page) {
+        0 -> {
+            icon = Icons.Rounded.Payments
+            title = "Know why you spent it"
+            body = "Intent Pay logs each UPI payment and asks what it was for, so your spending reads as reasons, not just amounts."
+        }
+        1 -> {
+            icon = Icons.Rounded.Notifications
+            title = "Payments logged as they happen"
+            body = "It reads bank SMS and payment-app notifications on this phone and adds a payment for each one."
+        }
+        else -> {
+            icon = Icons.Rounded.Lock
+            title = "Stays on this phone"
+            body = "Your payments are stored on this device. They only leave if you export them or turn on Google Drive sync."
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        if (page == 1) {
+            Spacer(modifier = Modifier.height(32.dp))
+            DetectedPreview()
+        }
+    }
+}
+
+/** A real-looking row from the app itself, showing what the sage dot means. */
+@Composable
+private fun DetectedPreview() {
+    GroupedCard {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Swiggy",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    DetectedDot()
+                }
+                Text(
+                    text = "Food · Detected from SMS",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = "−₹349.00",
+                style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
 
 @Composable
-fun PermissionsPage() {
+private fun PermissionsPage() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Enable Detection",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 12.dp)
+            text = "Turn on detection",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Grant these so Intent Pay can spot payments automatically. All optional — manual entry always works.",
-            fontSize = 15.sp,
-            color = TextSecondary,
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp,
-            modifier = Modifier.padding(bottom = 24.dp)
+            text = "Each one is optional, and you can always add a payment by hand.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(24.dp))
         DetectionPermissionRows()
-    }
-}
-
-@Composable
-fun OnboardingPage(page: Int) {
-    val title = when (page) {
-        0 -> "Welcome to Intent Pay"
-        1 -> "Automated Tracking"
-        else -> "Privacy First"
-    }
-    
-    val description = when (page) {
-        0 -> "Take control of your finances with a beautiful, zero-cost, and intelligent tracker."
-        1 -> "We securely read SMS and push notifications to categorize your transactions effortlessly, right on your device."
-        else -> "Your data never leaves your device unless you choose to export it. 100% private, forever."
-    }
-    
-    val icon = when (page) {
-        0 -> "✨"
-        1 -> "⚡"
-        else -> "🔒"
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = icon,
-            fontSize = 100.sp,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-        Text(
-            text = title,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        Text(
-            text = description,
-            fontSize = 16.sp,
-            color = TextSecondary,
-            textAlign = TextAlign.Center,
-            lineHeight = 24.sp
-        )
     }
 }

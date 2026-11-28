@@ -5,26 +5,25 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.intentpay.domain.models.Category
-import com.intentpay.ui.theme.IosBlue
-import com.intentpay.ui.theme.SurfaceDarkGray
-import com.intentpay.ui.theme.TextSecondary
+import com.intentpay.ui.components.AppTextField
+import com.intentpay.ui.components.PrimaryButton
+import com.intentpay.ui.components.SecondaryButton
+import com.intentpay.ui.components.SectionLabel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -78,15 +77,15 @@ fun ManualPaymentScreen(
                         if (!pn.isNullOrBlank()) merchantName = pn
                         if (!am.isNullOrBlank()) amount = am
                         scannedRawUri = qrResult
-                        snackbarHostState.showSnackbar("UPI details imported")
+                        snackbarHostState.showSnackbar("QR details added")
                     } else {
-                        snackbarHostState.showSnackbar("Invalid UPI QR Code")
+                        snackbarHostState.showSnackbar("That is not a UPI QR code")
                     }
                 } catch (e: Exception) {
-                    snackbarHostState.showSnackbar("Invalid UPI QR Code")
+                    snackbarHostState.showSnackbar("That is not a UPI QR code")
                 }
             } else {
-                snackbarHostState.showSnackbar("Invalid UPI QR Code")
+                snackbarHostState.showSnackbar("That is not a UPI QR code")
             }
             onClearQrResult()
         }
@@ -95,8 +94,8 @@ fun ManualPaymentScreen(
     if (showPermissionDeniedDialog) {
         AlertDialog(
             onDismissRequest = { showPermissionDeniedDialog = false },
-            title = { Text("Camera Permission Required") },
-            text = { Text("We need camera access to scan QR codes for payments.") },
+            title = { Text("Camera access needed") },
+            text = { Text("Allow camera access in Settings to scan a UPI QR code.") },
             confirmButton = {
                 TextButton(onClick = { showPermissionDeniedDialog = false }) {
                     Text("OK")
@@ -105,30 +104,25 @@ fun ManualPaymentScreen(
         )
     }
 
-    val textFieldColors = TextFieldDefaults.colors(
-        focusedContainerColor = SurfaceDarkGray,
-        unfocusedContainerColor = SurfaceDarkGray,
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        focusedTextColor = Color.White,
-        unfocusedTextColor = Color.White,
-        focusedLabelColor = IosBlue,
-        unfocusedLabelColor = TextSecondary
-    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.Black,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Manual Payment", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color.White) },
+                title = { Text("Add payment", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Rounded.ArrowBack, contentDescription = "Back", tint = IosBlue)
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         }
@@ -140,96 +134,66 @@ fun ManualPaymentScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
-            Button(
-                onClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SurfaceDarkGray)
-            ) {
-                Text("Scan QR Code Instead", color = IosBlue, fontSize = 17.sp)
-            }
+            SecondaryButton(
+                text = "Scan QR code",
+                onClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
-            
-            Text("PAYMENT DETAILS", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
 
-            // iOS Style Grouped List Background
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SurfaceDarkGray, RoundedCornerShape(10.dp))
-            ) {
-                TextField(
+            SectionLabel("Payment details")
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                AppTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Amount (₹)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
+                    label = "Amount (₹)",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
-                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-                
-                TextField(
+                AppTextField(
                     value = merchantName,
                     onValueChange = { merchantName = it },
-                    label = { Text("Merchant Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
+                    label = "Merchant"
                 )
-                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-                
-                TextField(
+                AppTextField(
                     value = upiId,
                     onValueChange = { upiId = it },
-                    label = { Text("Merchant UPI ID") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
+                    label = "UPI ID",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
-                HorizontalDivider(color = Color(0x33FFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-                
-                TextField(
+                AppTextField(
                     value = purpose,
                     onValueChange = { purpose = it },
-                    label = { Text("Purpose (Mandatory)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = textFieldColors
+                    label = "What is it for",
+                    supportingText = "Required"
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            Text("CATEGORY", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(start = 16.dp, bottom = 8.dp))
-            
+            SectionLabel("Category")
+
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Category.values().forEach { cat ->
-                    val isSelected = selectedCategory == cat
-                    Surface(
+                    FilterChip(
+                        selected = selectedCategory == cat,
                         onClick = { selectedCategory = cat },
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) IosBlue else SurfaceDarkGray,
-                    ) {
-                        Text(
-                            text = cat.displayName,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                        label = { Text(cat.displayName, style = MaterialTheme.typography.bodyMedium) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
-                    }
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
+            PrimaryButton(
+                text = "Pay with UPI app",
                 onClick = {
                     val sanitizedAmount = amount
                         .replace("₹", "")
@@ -244,7 +208,7 @@ fun ManualPaymentScreen(
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("Invalid amount")
                         }
-                        return@Button
+                        return@PrimaryButton
                     }
                     
                     if (purpose.isNotBlank() && upiId.isNotBlank()) {
@@ -296,19 +260,9 @@ fun ManualPaymentScreen(
                         }
                     }
                 },
-                enabled = purpose.isNotBlank() && amount.isNotBlank() && upiId.isNotBlank(),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = IosBlue,
-                    disabledContainerColor = SurfaceDarkGray
-                )
-            ) {
-                Text("Proceed to Pay", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-            }
-            
+                enabled = purpose.isNotBlank() && amount.isNotBlank() && upiId.isNotBlank()
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

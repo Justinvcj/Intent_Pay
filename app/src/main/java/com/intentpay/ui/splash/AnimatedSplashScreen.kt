@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,35 +31,32 @@ fun AnimatedSplashScreen(onAnimationFinished: () -> Unit) {
     var startAnimation by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1.0f else 0.5f,
-        animationSpec = androidx.compose.animation.core.spring(
-            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
-            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
-        ),
+        targetValue = if (startAnimation) 1.0f else 0.92f,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
         label = "splash_scale"
     )
     
     val alpha by animateFloatAsState(
         targetValue = if (startAnimation) 1.0f else 0.0f,
-        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
         label = "splash_alpha"
     )
 
     LaunchedEffect(Unit) {
         startAnimation = true
-        delay(1500)
+        delay(1000)
         onAnimationFinished()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0D12)), // Deeper dark for more premium look
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(id = R.drawable.intent_pay_logo),
-            contentDescription = "IntentPay Logo",
+            contentDescription = "Intent Pay",
             modifier = Modifier
                 .size(160.dp)
                 .scale(scale)

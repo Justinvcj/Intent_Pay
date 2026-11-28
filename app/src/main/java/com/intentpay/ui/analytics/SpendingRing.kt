@@ -20,9 +20,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun SpendingRing(
@@ -39,10 +37,7 @@ fun SpendingRing(
         animatedSweep.snapTo(0f)
         animatedSweep.animateTo(
             targetValue = 1f,
-            animationSpec = androidx.compose.animation.core.spring(
-                dampingRatio = 0.8f, // Add a little bounce for momentum
-                stiffness = androidx.compose.animation.core.Spring.StiffnessLow
-            )
+            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
         )
     }
 
@@ -53,7 +48,7 @@ fun SpendingRing(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 24.dp.toPx()
+            val strokeWidth = 16.dp.toPx()
             val sizePx = size.minDimension
             val rectSize = Size(sizePx - strokeWidth, sizePx - strokeWidth)
             val topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f)
@@ -66,7 +61,7 @@ fun SpendingRing(
                     useCenter = false,
                     topLeft = topLeft,
                     size = rectSize,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
                 )
                 return@Canvas
             }
@@ -84,18 +79,26 @@ fun SpendingRing(
                     useCenter = false,
                     topLeft = topLeft,
                     size = rectSize,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
                 )
                 currentStartAngle += sweepAngle
             }
         }
 
-        // Total spending text in the middle
-        androidx.compose.foundation.layout.Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Total Spent", color = labelColor, fontSize = 14.sp)
-            Text("₹$totalSpent", color = valueColor, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        // The leading category sits in the middle; the total is already the screen's headline figure.
+        val top = spends.maxByOrNull { it.percentage }
+        if (top != null) {
+            androidx.compose.foundation.layout.Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Top category", color = labelColor, style = MaterialTheme.typography.bodySmall)
+                Text(top.category.displayName, color = valueColor, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "${(top.percentage * 100).toInt()}% of spending",
+                    color = labelColor,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }

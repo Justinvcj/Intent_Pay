@@ -7,12 +7,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.style.TextAlign
+import com.intentpay.ui.components.GroupedCard
+import com.intentpay.ui.components.PrimaryButton
+import com.intentpay.ui.components.ScreenTitle
+import com.intentpay.ui.components.SectionLabel
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessibilityNew
 import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DataObject
 import androidx.compose.material.icons.rounded.Folder
@@ -28,7 +34,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -98,10 +103,10 @@ fun SettingsScreen(
                                 outputStream.write(exportData.toByteArray())
                             }
                         }
-                        Toast.makeText(context, "Exported successfully!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Export saved", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        Toast.makeText(context, "Export failed.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Export failed", Toast.LENGTH_SHORT).show()
                     }
                     pendingExportFormat = null
                 }
@@ -111,42 +116,22 @@ fun SettingsScreen(
 
     LaunchedEffect(budget) {
         budget?.let {
-            monthlyInput = it.monthlyBudget.toString()
-            dailyInput = it.dailyLimit.toString()
-            reflectionInput = it.reflectionThreshold.toString()
+            monthlyInput = plain(it.monthlyBudget)
+            dailyInput = plain(it.dailyLimit)
+            reflectionInput = plain(it.reflectionThreshold)
             sheetIdInput = it.googleDriveFolderId ?: ""
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleMedium) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.Rounded.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        ScreenTitle("Settings")
+
             SettingsGroup(title = "Budget limits") {
                 SettingsTextFieldRow(
                     icon = Icons.Rounded.Payments,
@@ -202,7 +187,8 @@ fun SettingsScreen(
             SettingsGroup(title = "Google Drive sync") {
                 SettingsTextFieldRow(
                     icon = Icons.Rounded.Folder,
-                    label = "Google Drive folder ID",
+                    label = "Drive folder ID",
+                    placeholder = "Not set",
                     value = sheetIdInput,
                     onValueChange = { sheetIdInput = it }
                 )
@@ -262,7 +248,8 @@ fun SettingsScreen(
                 )
             }
 
-            Button(
+            PrimaryButton(
+                text = "Save",
                 onClick = {
                     viewModel.updateBudget(
                         monthly = monthlyInput.toDoubleOrNull() ?: 10000.0,
@@ -271,46 +258,25 @@ fun SettingsScreen(
                     )
                     viewModel.updateSheetId(sheetIdInput)
                     onBack()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Save settings", style = MaterialTheme.typography.titleSmall)
-            }
+                }
+            )
 
-            Spacer(modifier = Modifier.height(32.dp))
-        }
+            Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
-/** Grouped, rounded surface with an optional muted header above it (iOS Settings style). */
+private fun plain(value: Double): String =
+    if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
+
+/** Grouped surface with a quiet sentence-case label above it (Apple Settings style). */
 @Composable
 fun SettingsGroup(
     title: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        if (title != null) {
-            Text(
-                text = title.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp)
-            )
-        }
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp,
-            shadowElevation = 1.dp
-        ) {
-            Column(content = content)
-        }
+        if (title != null) SectionLabel(title)
+        GroupedCard(content = content)
     }
 }
 
@@ -415,13 +381,15 @@ private fun SettingsTextFieldRow(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    prefix: String? = null,
+    placeholder: String? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -431,22 +399,49 @@ private fun SettingsTextFieldRow(
             tint = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.width(8.dp))
-        TextField(
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.weight(1f),
             singleLine = true,
-            placeholder = { Text(label, style = MaterialTheme.typography.bodyLarge) },
-            textStyle = MaterialTheme.typography.bodyLarge,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
+            modifier = Modifier.weight(1f),
+            decorationBox = { inner ->
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (prefix != null) {
+                        Text(
+                            prefix,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Box(contentAlignment = Alignment.CenterEnd) {
+                        if (value.isEmpty() && placeholder != null) {
+                            Text(
+                                placeholder,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                        inner()
+                    }
+                }
+            }
         )
     }
 }

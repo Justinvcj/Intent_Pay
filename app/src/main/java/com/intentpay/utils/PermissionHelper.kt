@@ -10,25 +10,21 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.intentpay.ui.components.GlassButton
-import com.intentpay.ui.components.GlassCard
-import com.intentpay.ui.theme.IosGreen
-import com.intentpay.ui.theme.TextSecondary
+import com.intentpay.ui.components.GroupedCard
+import com.intentpay.ui.components.ListDivider
+import com.intentpay.ui.components.SecondaryButton
 
 /** State checks + intents for the three detection channels. */
 object PermissionHelper {
@@ -113,29 +109,27 @@ fun DetectionPermissionRows(modifier: Modifier = Modifier) {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { state.refresh() }
 
-    GlassCard(modifier = modifier.fillMaxWidth(), cornerRadius = 12.dp) {
-        Column {
-            PermissionRow(
-                title = "SMS Access",
-                subtitle = "Detect bank & UPI SMS alerts",
-                enabled = state.sms,
-                onClick = { smsLauncher.launch(PermissionHelper.runtimePermissions()) }
-            )
-            HorizontalDivider(color = Color(0x1AFFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-            PermissionRow(
-                title = "Notification Access",
-                subtitle = "Read GPay, PhonePe, Paytm, BHIM alerts",
-                enabled = state.notificationListener,
-                onClick = { context.startActivity(PermissionHelper.notificationListenerIntent()) }
-            )
-            HorizontalDivider(color = Color(0x1AFFFFFF), thickness = 0.5.dp, modifier = Modifier.padding(start = 16.dp))
-            PermissionRow(
-                title = "Accessibility",
-                subtitle = "Catch payments as they happen",
-                enabled = state.accessibility,
-                onClick = { context.startActivity(PermissionHelper.accessibilityIntent()) }
-            )
-        }
+    GroupedCard(modifier = modifier) {
+        PermissionRow(
+            title = "SMS access",
+            subtitle = "Detect bank and UPI SMS alerts",
+            enabled = state.sms,
+            onClick = { smsLauncher.launch(PermissionHelper.runtimePermissions()) }
+        )
+        ListDivider()
+        PermissionRow(
+            title = "Notification access",
+            subtitle = "Read GPay, PhonePe, Paytm and BHIM alerts",
+            enabled = state.notificationListener,
+            onClick = { context.startActivity(PermissionHelper.notificationListenerIntent()) }
+        )
+        ListDivider()
+        PermissionRow(
+            title = "Accessibility",
+            subtitle = "Catch payments as they happen",
+            enabled = state.accessibility,
+            onClick = { context.startActivity(PermissionHelper.accessibilityIntent()) }
+        )
     }
 }
 
@@ -148,14 +142,15 @@ private fun PermissionRow(title: String, subtitle: String, enabled: Boolean, onC
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-            Text(subtitle, color = TextSecondary, fontSize = 12.sp)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(Modifier.width(12.dp))
         if (enabled) {
-            Text("✓ Enabled", color = IosGreen, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text("On", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         } else {
-            GlassButton(text = "Enable", onClick = onClick, isPrimary = false)
+            // Fixed width: a fill-width button would collapse the label column to nothing.
+            SecondaryButton(text = "Enable", onClick = onClick, compact = true, modifier = Modifier.width(96.dp))
         }
     }
 }

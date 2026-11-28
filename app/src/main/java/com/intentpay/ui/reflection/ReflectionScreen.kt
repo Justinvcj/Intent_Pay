@@ -1,5 +1,6 @@
 package com.intentpay.ui.reflection
 
+import com.intentpay.ui.components.formatInr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -156,7 +157,7 @@ private fun ReflectionHeroHeader(amount: Double, category: Category) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "₹$amount",
+            text = formatInr(amount),
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center

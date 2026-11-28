@@ -155,7 +155,9 @@ private fun PermissionRow(title: String, subtitle: String, enabled: Boolean, onC
         if (enabled) {
             Text("✓ Enabled", color = IosGreen, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         } else {
-            GlassButton(text = "Enable", onClick = onClick, isPrimary = false)
+            // GlassButton is fillMaxWidth by default; without a fixed width it consumes the whole
+            // row and collapses the weighted label column to zero width.
+            GlassButton(text = "Enable", onClick = onClick, isPrimary = false, modifier = Modifier.width(110.dp))
         }
     }
 }
